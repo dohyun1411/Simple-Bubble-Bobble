@@ -9,21 +9,11 @@ from global_variables import *
 
 # Initialize
 pygame.init()
-screen_width = 1200
-screen_height = 720
 screen = pygame.display.set_mode((screen_width, screen_height))
-screen_info = {
-    'width': screen_width,
-    'height': screen_height,
-    'offset': 50
-}
-
 pygame.display.set_caption('Simple Bubble Bobble')
-
 clock = pygame.time.Clock()
 
-
-# Load images
+# Load player images
 cur_path = os.path.dirname(__file__)
 player_img_path = os.path.join(cur_path, 'images/player')
 player_imgs = {
@@ -36,10 +26,22 @@ player_imgs = {
     'ghost': pygame.image.load(os.path.join(player_img_path, "ghost.png")).convert_alpha()
 }
 
+# Load background images
+background_img_path = os.path.join(cur_path, 'images/background')
+background_imgs = {
+    'ground': pygame.image.load(os.path.join(background_img_path, "ground.png")),
+    'night': pygame.image.load(os.path.join(background_img_path, "night.png")),
+    'jungle': pygame.image.load(os.path.join(background_img_path, "jungle.png")),
+    'ocean': pygame.image.load(os.path.join(background_img_path, "ocean.png")),
+    'volcano': pygame.image.load(os.path.join(background_img_path, "volcano.png"))
+}
 
 # Create a Player
 player = Player(images=player_imgs, screen_info=screen_info)
 
+# background
+normal_background_list = ['ground', 'night', 'jungle', 'ocean']
+normal_background = background_imgs[random.choice(normal_background_list)]
 
 # Event Loop
 running = True
@@ -62,8 +64,8 @@ while running:
             if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
                 player_dx = 0 # Stop moving
     
-
-    screen.fill(WHITE)
+    # Draw background
+    screen.blit(normal_background, (0, 0))
 
     # Draw player
     player.set_dir(player_dir) # Set player direction
