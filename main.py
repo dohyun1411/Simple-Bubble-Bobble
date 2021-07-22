@@ -3,6 +3,7 @@ import math
 import random
 import pygame
 
+from map import *
 from player import *
 from global_variables import *
 
@@ -36,12 +37,23 @@ background_imgs = {
     'volcano': pygame.image.load(os.path.join(background_img_path, "volcano.png"))
 }
 
+# Load map images
+map_img_path = os.path.join(cur_path, 'images/map')
+map_imgs = {
+    'brown': pygame.image.load(os.path.join(map_img_path, "brown.png")).convert_alpha()
+}
+
 # Create a Player
 player = Player(images=player_imgs, screen_info=screen_info)
 
 # background
 normal_background_list = ['ground', 'night', 'jungle', 'ocean']
-normal_background = background_imgs[random.choice(normal_background_list)]
+normal_background_name = random.choice(normal_background_list)
+normal_background = background_imgs[normal_background_name]
+
+# Create a map
+map_img = random.choice(list(map_imgs.values()))
+map = create_map(map_img)
 
 # Event Loop
 running = True
@@ -66,6 +78,9 @@ while running:
     
     # Draw background
     screen.blit(normal_background, (0, 0))
+
+    # Draw map
+    map.draw(screen)
 
     # Draw player
     player.set_dir(player_dir) # Set player direction
