@@ -25,7 +25,7 @@ class Player(pygame.sprite.Sprite):
         if pos:
             self.pos = pos
         else:
-            self.pos = (screen_info['offset'], screen_info['height'] - screen_info['offset'])
+            self.pos = (screen_info['x_offset'], screen_info['height'] - screen_info['y_offset'])
         self.rect = self.image.get_rect(center=self.pos)
 
         self.dir = dir
@@ -46,6 +46,10 @@ class Player(pygame.sprite.Sprite):
 
     def walk(self, dx):
         self.rect.x += dx
+        if self.rect.x < 0:
+            self.rect.x = 0
+        elif self.rect.x > screen_width - player_width:
+            self.rect.x = screen_width - player_width
 
         # Change status and image
         if self.status == 'standing':
