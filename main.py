@@ -29,36 +29,35 @@ player_imgs = {
 
 # Load background images
 background_img_path = os.path.join(cur_path, 'images/background')
-background_imgs = {
-    'ground': pygame.image.load(os.path.join(background_img_path, "ground.png")),
-    'night': pygame.image.load(os.path.join(background_img_path, "night.png")),
-    'jungle': pygame.image.load(os.path.join(background_img_path, "jungle.png")),
-    'ocean': pygame.image.load(os.path.join(background_img_path, "ocean.png")),
-    'volcano': pygame.image.load(os.path.join(background_img_path, "volcano.png"))
-}
+background = pygame.image.load(os.path.join(background_img_path, "night.png"))
+#     'night': pygame.image.load(os.path.join(background_img_path, "night.png")),
+#     'jungle': pygame.image.load(os.path.join(background_img_path, "jungle.png")),
+#     'ocean': pygame.image.load(os.path.join(background_img_path, "ocean.png")),
+#     'volcano': pygame.image.load(os.path.join(background_img_path, "volcano.png"))
+# }
 
 # Load map images
 map_img_path = os.path.join(cur_path, 'images/map')
 map_imgs = {
-    'brown': pygame.image.load(os.path.join(map_img_path, "brown.png")).convert_alpha()
+    'brown': pygame.image.load(os.path.join(map_img_path, "brick.png")).convert_alpha()
 }
 
 # Create a Player
 player = Player(images=player_imgs, screen_info=screen_info)
 
 # background
-normal_background_list = ['ground', 'night', 'jungle', 'ocean']
-normal_background_name = random.choice(normal_background_list)
-normal_background = background_imgs[normal_background_name]
+# normal_background_list = ['ground', 'night', 'jungle', 'ocean']
+# normal_background_name = random.choice(normal_background_list)
+# normal_background = background_imgs[normal_background_name]
 
 # Create a map
 map_img = random.choice(list(map_imgs.values()))
-map = create_map(map_img)
+map, brick_dict = create_map(map_img)
 
 # Event Loop
 running = True
 while running:
-    clock.tick(30) # FPS
+    clock.tick(fps) # FPS
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT: # quit
@@ -67,29 +66,44 @@ while running:
         elif event.type == pygame.KEYDOWN: # keyboard down
             if event.key == pygame.K_LEFT: # left key
                 player_dir = LEFT # Set direction to left
-                player_dx -= player_speed # Move to left
+                player_dx_left -= player_speed # Move to left
             elif event.key == pygame.K_RIGHT: # right key
                 player_dir = RIGHT # Set direction to right
-                player_dx += player_speed # Move to right
+                player_dx_right += player_speed # Move to right
+            elif event.key == pygame.K_UP and not is_jumpping: # up key
+                is_jumpping = True # Jump
+                player_dy = player_jumping_speed
 
         elif event.type == pygame.KEYUP: # keyboard up
-            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                player_dx = 0 # Stop moving
+            if event.key == pygame.K_LEFT:
+                player_dx_left = 0 # Stop moving
+            elif event.key == pygame.K_RIGHT:
+                player_dx_right = 0
     
     # Draw background
-    screen.blit(normal_background, (0, 0))
+    screen.blit(background, (0, 0))
+    # screen.fill(BLACK)
 
     # Draw map
     map.draw(screen)
 
     # Draw player
     player.set_dir(player_dir) # Set player direction
-    if player_dx: # player is walking
-        player.walk(player_dx)
+    if player_dx_left + player_dx_right: # player is walking
+        player.walk(player_dx_left + player_dx_right)
     else: # player is standing
         player.stand()
+    
+    if is_jumpping: # player is jumping
+        if player_dy >= 0:
+            player.jump(player_dy)
+        else:
+            is_jumpping = not player.land(player_dy, map)
+        player_dy -= gravity
+    
+    # print(is_jumpping)
     player.draw(screen)
-
+    
     pygame.display.update()
 
 pygame.quit()    
