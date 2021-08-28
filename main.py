@@ -27,7 +27,13 @@ player_imgs = {
     'dead': pygame.image.load(os.path.join(player_img_path, "dead.png")).convert_alpha(),
     'ghost': pygame.image.load(os.path.join(player_img_path, "ghost.png")).convert_alpha()
 }
-bubble_img = pygame.image.load(os.path.join(player_img_path, "ghost_in_bubble.png")).convert_alpha()
+bubble_imgs = {
+    'bubble': pygame.image.load(os.path.join(player_img_path, "bubble.png")).convert_alpha(),
+    'reaper': pygame.image.load(os.path.join(player_img_path, "reaper_in_bubble.png")).convert_alpha(),
+    'reaper3': pygame.image.load(os.path.join(player_img_path, "reaper3_in_bubble.png")).convert_alpha(),
+    'reaper4': pygame.image.load(os.path.join(player_img_path, "reaper4_in_bubble.png")).convert_alpha(),
+    'boom': pygame.image.load(os.path.join(player_img_path, "boom.png")).convert_alpha()
+}
 
 # Load emeny images
 enemy_img_path = os.path.join(cur_path, 'images/enemy')
@@ -56,6 +62,7 @@ bubble_group = pygame.sprite.Group()
 
 # Create enemy group
 enemy_group = pygame.sprite.Group()
+enemy_list = []
 
 # Create a map
 map_img = random.choice(list(map_imgs.values()))
@@ -63,8 +70,9 @@ map, brick_dict = create_map(map_img)
 
 # Event Loop
 running = True
-round = 20
+round = 0
 new_round = True
+delay = 0
 while running:
     clock.tick(fps) # FPS
 
@@ -89,7 +97,7 @@ while running:
                 else:
                     bubble_pos = (player.get_rect().left, player.get_pos()[1])
 
-                bubble_group.add(Bubble(image=bubble_img, pos=bubble_pos, dir=player.dir, group=bubble_group))
+                bubble_group.add(Bubble(images=bubble_imgs, pos=bubble_pos, dir=player.dir, group=bubble_group, screen=screen))
 
 
         elif event.type == pygame.KEYUP: # keyboard up
@@ -132,15 +140,18 @@ while running:
     
     # Draw enemy
     if new_round:
-        for _ in range(round):
-            enemy = Enemy(images=enemy_imgs, screen_info=screen_info, map=map)
+        pygame.time.wait(500)
+        enemy_num = [1, 5, 10, 20, 50][round]
+        for _ in range(enemy_num):
+            enemy = Enemy(images=enemy_imgs, map=map, group=enemy_group, list_=enemy_list)
             enemy_group.add(enemy)
+            enemy_list.append(enemy)
         new_round = False
+        round += 1
 
     for enemy in enemy_group:
         enemy.act_randomly()
         enemy.set_correct_pos()
-        # enemy.draw(screen)
     enemy_group.draw(screen)
 
     # Draw bubble
@@ -148,9 +159,25 @@ while running:
     for bubble in bubble_group:
         bubble.shoot(map)
 
+    bubble_enemy = pygame.sprite.groupcollide(bubble_group, enemy_group, False, False)
+    for bubble, enemies in bubble_enemy.items():
+        enemy = enemies[0]
+        if enemy.type != 'reaper2' and bubble.power and delay == 0:
+            enemy.remove()
+            bubble.attack(enemy)
+            delay += 1
+    delay = delay + 1 if delay else 0
+    if delay > 6:
+        delay = 0
 
+    bubble = pygame.sprite.spritecollideany(player, bubble_group)
+    if bubble:
+        bubble.remove()
 
-    
+    print(len(enemy_list))
+    if not enemy_list:
+        new_round = True
+
     pygame.display.update()
 
 

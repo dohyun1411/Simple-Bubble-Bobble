@@ -9,31 +9,41 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(
         self,
         images,
-        screen_info,
-        map
+        map,
+        group,
+        list_
         ):
 
         super(Enemy,  self).__init__()
         
         self.images = images
-        id_, self.image = random.choice(list(images.items()))
-        self.dangerous = id_ == 'reaper2'
+        while True:
+            id_, self.image = random.choice(list(images.items()))
+            if id_ != 'reaper2':
+                break
+        self.type = id_
         self.original_image = self.image
         self.is_collided_with_wall = 1
+        self.group = group
+        self.list = list_
 
-        self.pos = (screen_info['x_offset'] + random.randint(0, 60), fourth_y - brick_size)
+        self.pos = (random.randint(36, screen_width - 36), fourth_y - brick_size)
         self.rect = self.image.get_rect(center=self.pos)
 
         self.x_speed = random.randint(4, 8)
         self.y_speed = 4
         self.flipping = False
-        self.dir = enemy_dir
+        self.dir = random.choice([LEFT, RIGHT])
         self.map = map
         self.collided_brick = None
         self.status = 'walking'
         self.turn = 0
         self.prev_action = self.walk
         self.jump_before = False
+
+    def set_pos(self, pos):
+        self.pos = pos
+        self.rect.center =pos
 
     def stand(self):
         if self.turn % 10 == 1:
@@ -66,7 +76,8 @@ class Enemy(pygame.sprite.Sprite):
         self.pos = self.rect.center
         brick = pygame.sprite.spritecollideany(self, self.map)
         self.collided_brick = brick
-        if brick and self.turn > 4 and brick.rect.top + 5 > self.rect.bottom:
+        if (brick and self.turn > 4 and brick.rect.top + 5 > self.rect.bottom) \
+            or self.rect.top < 0:
             self.turn = 100
             self.set_correct_pos(force=True)
             self.status = 'walking'
@@ -82,7 +93,7 @@ class Enemy(pygame.sprite.Sprite):
         return False
     
     def set_correct_pos(self, force=False):
-        if (self.collided_brick and self.status not in  {'landing', 'jumping'}) or force:
+        if self.collided_brick and (self.status not in  {'landing', 'jumping'} or force):
             if self.rect.bottom != self.collided_brick.rect.top + 20:
                 self.rect.bottom = self.collided_brick.rect.top + 20
                 self.pos = self.rect.center
@@ -117,6 +128,9 @@ class Enemy(pygame.sprite.Sprite):
             if pygame.sprite.spritecollideany(pseudo, self.map):
                 return True
         return False
+        
+    def remove(self):
+        self.group.remove(self)
 
 
 class PseudoEnemy(pygame.sprite.Sprite):
@@ -124,4 +138,3 @@ class PseudoEnemy(pygame.sprite.Sprite):
         super(PseudoEnemy,  self).__init__()
         self.pos = pos
         self.rect = image.get_rect(center=self.pos)
-    

@@ -1,4 +1,4 @@
-import os
+import random
 
 # Colors
 WHITE = (255, 255, 255)
@@ -31,9 +31,6 @@ is_jumpping = False
 player_jumping_speed = 28
 player_dy = 0
 gravity = 2
-
-# Enemy confings
-enemy_dir = RIGHT
 
 # Map configs
 brick_size = 40

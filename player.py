@@ -1,4 +1,3 @@
-import random
 import pygame
 
 from config import *
@@ -117,16 +116,18 @@ class Bubble(pygame.sprite.Sprite):
 
     def __init__(
         self,
-        image,
+        images,
         dir,
         group,
+        screen,
         pos=None,
         ):
 
         super(Bubble,  self).__init__()
 
-        self.image = image
-        self.original_image = image
+        self.images = images
+        self.image = images['bubble']
+        self.original_image = self.image
         self.pos = pos
         self.rect = self.image.get_rect(center=self.pos)
         self.dir = dir
@@ -136,6 +137,10 @@ class Bubble(pygame.sprite.Sprite):
         self.rot_dir = 1
         self.original_rot_dir = 0
         self.group = group
+        self.power = 3
+        self.status = 0
+        self.screen = screen
+        self.enemy = None
     
     def set_original_rot_dir(self, rot_dir, force=False):
         if not force and self.original_rot_dir:
@@ -143,6 +148,7 @@ class Bubble(pygame.sprite.Sprite):
         self.original_rot_dir = rot_dir
 
     def walk(self, map):
+        self.power = 0
         brick = pygame.sprite.spritecollideany(self, map)
         if brick and abs(self.rect.top - brick.rect.top) > abs(self.rect.top - brick.rect.bottom):
             self.set_original_rot_dir(self.rot_dir)
@@ -150,7 +156,7 @@ class Bubble(pygame.sprite.Sprite):
             if self.rect.right > screen_width or self.rect.left < 0:
                 self.set_original_rot_dir(-self.rot_dir, force=True)
         elif self.rect.y < 0:
-            self.remove()
+            self.remove(re=True)
         else:
             self.rect.y -= 2
         self.pos = self.rect.center
@@ -161,17 +167,36 @@ class Bubble(pygame.sprite.Sprite):
     
     def shoot(self, map):
         if self.count < 2:
+            self.power -= 1
             self.count += 1
             self.rect.x += 40 * self.dir
             self.pos = self.rect.center
-            # return self.shoot(map)
         else:
             return self.walk(map)
     
     def rotate(self):
         self.image = pygame.transform.rotozoom(self.original_image, self.angle, 1)
+        if self.enemy:
+            flipping = True if self.enemy.dir == LEFT else False
+            self.image = pygame.transform.flip(self.image, flipping, False)
         self.rect = self.image.get_rect(center=self.pos)
     
-    def remove(self):
-        self.group.remove(self)
-        
+    def remove(self, count=0, re=False):
+        if self.enemy and re:
+            self.group.remove(self)
+            self.enemy.set_pos(self.pos)
+            self.enemy.group.add(self.enemy)
+            return
+        if count > 60:
+            if self.enemy:
+                self.enemy.list.remove(self.enemy)
+            self.group.remove(self)
+            return
+        count += 1
+        self.screen.blit(self.images['boom'], self.pos)
+        return self.remove(count + 1)
+
+    def attack(self, enemy):
+        self.original_image = self.images[enemy.type]
+        self.status = 1
+        self.enemy = enemy
