@@ -1,4 +1,4 @@
-import os
+import random
 import pygame
 
 from global_variables import *
@@ -22,7 +22,7 @@ class Player(pygame.sprite.Sprite):
         self.original_image = self.image
         self.status = status
 
-        assert pos or screen_info, 'Either pos or screen_info must be given to create Charater'
+        # assert pos or screen_info, 'Either pos or screen_info must be given to create Charater'
         if pos:
             self.pos = pos
         else:
@@ -30,8 +30,9 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.pos)
 
         self.dir = dir
-
         self.standing_walking_count = 0
+        self.collided_brick = None
+        self.shooting_image_count = 0
     
     def get_pos(self):
         return self.pos
@@ -43,7 +44,15 @@ class Player(pygame.sprite.Sprite):
         """
         Set image to corresponding status.
         """
-        self.status = status
+        
+        if status == 'shooting':
+            self.shooting_image_count = 4
+        self.shooting_image_count -= 1
+        if self.shooting_image_count > 0:
+            self.status = 'shooting'
+        else:
+            self.status = status
+
         self.image = self.images[self.status]
         self.original_image = self.image
     
@@ -53,6 +62,12 @@ class Player(pygame.sprite.Sprite):
     def stand(self):
         self.status = 'standing'
         self.set_image(self.status)
+    
+    def set_correct_pos(self):
+        if self.status != 'landing':
+            if self.rect.bottom != self.collided_brick.rect.top + 5:
+                self.rect.bottom = self.collided_brick.rect.top + 5
+                self.pos = self.rect.center
 
     def walk(self, dx):
         self.rect.x += dx
@@ -63,13 +78,17 @@ class Player(pygame.sprite.Sprite):
         self.pos = self.rect.center
 
         # Change status and image
-        self.standing_walking_count += 1
-        if self.standing_walking_count == 6:
-            self.standing_walking_count = 0
-            if self.status != 'walking':
-                self.status = 'walking'
-            elif self.status != 'standing':
-                self.status = 'standing'
+        # self.standing_walking_count += 1
+        # if self.standing_walking_count == 6:
+        #     self.standing_walking_count = 0
+        #     if self.status != 'walking':
+        #         self.status = 'walking'
+        #     elif self.status != 'standing':
+        #         self.status = 'standing'
+        if self.status != 'walking':
+            self.status = 'walking'
+        elif self.status != 'standing':
+            self.status = 'standing'
         
         self.set_image(self.status)
         
@@ -91,14 +110,46 @@ class Player(pygame.sprite.Sprite):
         self.rect.y -= dy
         self.pos = self.rect.center
         self.set_image('landing')
-        # if self.rect.left < 10 * brick_size or self.rect.right 
 
+        for brick in map:
+            if pygame.sprite.collide_mask(self, brick):
+                self.collided_brick = brick
+                return True
 
-        if self.rect.bottom >= screen_height - brick_size:
-            return True
-        # for brick in map:
-        #     brick_rect = brick.get_rect()
-        #     if not pygame.sprite.collide_mask(self, brick): continue
-        #     if self.rect.bottom >= brick_rect.top:
-        #         return True # landing successufully
         return False # still falling
+    
+    def shoot(self):
+        self.set_image('shooting')
+
+
+class Bubble(pygame.sprite.Sprite):
+
+    def __init__(
+        self,
+        image,
+        dir,
+        pos=None,
+        ):
+
+        super(Bubble,  self).__init__()
+
+        self.image = image
+        self.pos = pos
+        self.rect = self.image.get_rect(center=self.pos)
+        self.dir = dir
+        self.life = 10
+        self.count = 0
+    
+    def walk(self):
+        self.rect.y -= 4
+    
+    def shoot(self):
+        if self.count < 16:
+            self.count += 1
+            self.rect.x += 4 * self.dir
+            self.pos = self.rect.center
+            return self.shoot()
+        return self.walk()
+        
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)

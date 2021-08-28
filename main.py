@@ -5,6 +5,7 @@ import pygame
 
 from map import *
 from player import *
+from enemy import *
 from global_variables import *
 
 
@@ -26,15 +27,20 @@ player_imgs = {
     'dead': pygame.image.load(os.path.join(player_img_path, "dead.png")).convert_alpha(),
     'ghost': pygame.image.load(os.path.join(player_img_path, "ghost.png")).convert_alpha()
 }
+bubble_img = pygame.image.load(os.path.join(player_img_path, "bubble.png")).convert_alpha()
+
+# Load emeny images
+enemy_img_path = os.path.join(cur_path, 'images/enemy')
+enemy_imgs = {
+    'reaper': pygame.image.load(os.path.join(enemy_img_path, 'reaper.png')).convert_alpha(),
+    'reaper2': pygame.image.load(os.path.join(enemy_img_path, 'reaper2.png')).convert_alpha(), # dangerous
+    'reaper3': pygame.image.load(os.path.join(enemy_img_path, 'reaper3.png')).convert_alpha(),
+    'reaper4': pygame.image.load(os.path.join(enemy_img_path, 'reaper4.png')).convert_alpha()
+}
 
 # Load background images
 background_img_path = os.path.join(cur_path, 'images/background')
 background = pygame.image.load(os.path.join(background_img_path, "night.png"))
-#     'night': pygame.image.load(os.path.join(background_img_path, "night.png")),
-#     'jungle': pygame.image.load(os.path.join(background_img_path, "jungle.png")),
-#     'ocean': pygame.image.load(os.path.join(background_img_path, "ocean.png")),
-#     'volcano': pygame.image.load(os.path.join(background_img_path, "volcano.png"))
-# }
 
 # Load map images
 map_img_path = os.path.join(cur_path, 'images/map')
@@ -45,10 +51,11 @@ map_imgs = {
 # Create a Player
 player = Player(images=player_imgs, screen_info=screen_info)
 
-# background
-# normal_background_list = ['ground', 'night', 'jungle', 'ocean']
-# normal_background_name = random.choice(normal_background_list)
-# normal_background = background_imgs[normal_background_name]
+# Create bubble group
+bubble_group = pygame.sprite.Group()
+
+# Create an Enemy
+enemy = Enemy(images=enemy_imgs, screen_info=screen_info)
 
 # Create a map
 map_img = random.choice(list(map_imgs.values()))
@@ -73,6 +80,15 @@ while running:
             elif event.key == pygame.K_UP and not is_jumpping: # up key
                 is_jumpping = True # Jump
                 player_dy = player_jumping_speed
+            elif event.key == pygame.K_SPACE:
+                player.shoot()
+                if player.dir == RIGHT:
+                    bubble_pos = (player.get_rect().right, player.get_pos()[1])
+                else:
+                    bubble_pos = (player.get_rect().left, player.get_pos()[1])
+
+                bubble_group.add(Bubble(image=bubble_img, pos=bubble_pos, dir=player.dir))
+
 
         elif event.type == pygame.KEYUP: # keyboard up
             if event.key == pygame.K_LEFT:
@@ -82,13 +98,15 @@ while running:
     
     # Draw background
     screen.blit(background, (0, 0))
-    # screen.fill(BLACK)
 
     # Draw map
     map.draw(screen)
 
     # Draw player
+    player.draw(screen)
+
     player.set_dir(player_dir) # Set player direction
+
     if player_dx_left + player_dx_right: # player is walking
         player.walk(player_dx_left + player_dx_right)
     else: # player is standing
@@ -101,8 +119,33 @@ while running:
             is_jumpping = not player.land(player_dy, map)
         player_dy -= gravity
     
-    # print(is_jumpping)
-    player.draw(screen)
+    else:
+        for brick in map:
+            if pygame.sprite.collide_mask(player, brick):
+                player.collided_brick = brick
+                player_dy = -gravity
+                break
+        else:
+            player.land(player_dy, map)
+            player_dy -= gravity
+        player.set_correct_pos()
+    
+    # Draw bubble
+    bubble_group.draw(screen)
+    for bubble in bubble_group:
+        bubble.shoot()
+
+    
+    # Draw enemy
+    enemy.draw(screen)
+
+    is_collided_with_wall = enemy.walk(enemy_speed)
+    if is_collided_with_wall:
+        enemy_speed *= -1
+
+
+
+
     
     pygame.display.update()
 

@@ -19,15 +19,16 @@ class Brick(pygame.sprite.Sprite):
         return self.rect
 
 floor_types = [ # _ : brick, . : empty
-    '________________________________',
-    '__________..........__________'
+    '______________________________',
+    '__________..........__________',
+    '_______.....______....._______'
 ]
 
 def create_map(image):
 
     # 2nd and 3rd floor
     second = floor_types[1]
-    third = floor_types[1]
+    third = floor_types[2]
     fourth = floor_types[1]
 
     # bottom and top
