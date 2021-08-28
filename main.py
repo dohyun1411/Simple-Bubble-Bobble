@@ -6,7 +6,7 @@ import pygame
 from map import *
 from player import *
 from enemy import *
-from global_variables import *
+from config import *
 
 
 # Initialize
@@ -27,7 +27,7 @@ player_imgs = {
     'dead': pygame.image.load(os.path.join(player_img_path, "dead.png")).convert_alpha(),
     'ghost': pygame.image.load(os.path.join(player_img_path, "ghost.png")).convert_alpha()
 }
-bubble_img = pygame.image.load(os.path.join(player_img_path, "bubble.png")).convert_alpha()
+bubble_img = pygame.image.load(os.path.join(player_img_path, "ghost_in_bubble.png")).convert_alpha()
 
 # Load emeny images
 enemy_img_path = os.path.join(cur_path, 'images/enemy')
@@ -54,8 +54,8 @@ player = Player(images=player_imgs, screen_info=screen_info)
 # Create bubble group
 bubble_group = pygame.sprite.Group()
 
-# Create an Enemy
-enemy = Enemy(images=enemy_imgs, screen_info=screen_info)
+# Create enemy group
+enemy_group = pygame.sprite.Group()
 
 # Create a map
 map_img = random.choice(list(map_imgs.values()))
@@ -63,6 +63,8 @@ map, brick_dict = create_map(map_img)
 
 # Event Loop
 running = True
+round = 20
+new_round = True
 while running:
     clock.tick(fps) # FPS
 
@@ -87,7 +89,7 @@ while running:
                 else:
                     bubble_pos = (player.get_rect().left, player.get_pos()[1])
 
-                bubble_group.add(Bubble(image=bubble_img, pos=bubble_pos, dir=player.dir))
+                bubble_group.add(Bubble(image=bubble_img, pos=bubble_pos, dir=player.dir, group=bubble_group))
 
 
         elif event.type == pygame.KEYUP: # keyboard up
@@ -120,33 +122,36 @@ while running:
         player_dy -= gravity
     
     else:
-        for brick in map:
-            if pygame.sprite.collide_mask(player, brick):
-                player.collided_brick = brick
-                player_dy = -gravity
-                break
+        if brick := pygame.sprite.spritecollideany(player, map):
+            player.collided_brick = brick
+            player_dy = -gravity
         else:
             player.land(player_dy, map)
             player_dy -= gravity
         player.set_correct_pos()
     
+    # Draw enemy
+    if new_round:
+        for _ in range(round):
+            enemy = Enemy(images=enemy_imgs, screen_info=screen_info, map=map)
+            enemy_group.add(enemy)
+        new_round = False
+
+    for enemy in enemy_group:
+        enemy.act_randomly()
+        enemy.set_correct_pos()
+        # enemy.draw(screen)
+    enemy_group.draw(screen)
+
     # Draw bubble
     bubble_group.draw(screen)
     for bubble in bubble_group:
-        bubble.shoot()
-
-    
-    # Draw enemy
-    enemy.draw(screen)
-
-    is_collided_with_wall = enemy.walk(enemy_speed)
-    if is_collided_with_wall:
-        enemy_speed *= -1
-
+        bubble.shoot(map)
 
 
 
     
     pygame.display.update()
+
 
 pygame.quit()    

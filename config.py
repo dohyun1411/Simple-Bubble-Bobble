@@ -34,8 +34,6 @@ gravity = 2
 
 # Enemy confings
 enemy_dir = RIGHT
-# enemy_dx = 0
-enemy_speed = 4
 
 # Map configs
 brick_size = 40

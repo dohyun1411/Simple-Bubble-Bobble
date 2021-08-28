@@ -1,8 +1,6 @@
-import os
-import random
 import pygame
 
-from global_variables import *
+from config import *
 
 
 class Brick(pygame.sprite.Sprite):
@@ -31,17 +29,11 @@ def create_map(image):
     third = floor_types[2]
     fourth = floor_types[1]
 
-    # bottom and top
+    # bottom
     bottom = floor_types[0]
-    top = floor_types[0]
     
     brick_group = pygame.sprite.Group()
     brick_dict = {} # pos: Brick
-    # for idx, char in enumerate(top):
-    #     if char == '_':
-    #         x = idx * brick_size + brick_size // 2
-    #         y = brick_size // 2
-    #         brick_dict[(x, y)] = Brick(image, (x, y))
 
     for idx, char in enumerate(fourth):
         if char == '_':
@@ -71,9 +63,3 @@ def create_map(image):
         brick_group.add(brick)
 
     return brick_group, brick_dict
-
-def get_nearest_brick_x(pos, brick_dict):
-    x, _ = pos
-    idx = x // brick_size
-    brick_x = idx * brick_size + brick_size // 2
-    return brick_x

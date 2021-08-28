@@ -1,7 +1,7 @@
 import random
 import pygame
 
-from global_variables import *
+from config import *
 
 
 class Player(pygame.sprite.Sprite):
@@ -77,14 +77,6 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = screen_width
         self.pos = self.rect.center
 
-        # Change status and image
-        # self.standing_walking_count += 1
-        # if self.standing_walking_count == 6:
-        #     self.standing_walking_count = 0
-        #     if self.status != 'walking':
-        #         self.status = 'walking'
-        #     elif self.status != 'standing':
-        #         self.status = 'standing'
         if self.status != 'walking':
             self.status = 'walking'
         elif self.status != 'standing':
@@ -111,10 +103,9 @@ class Player(pygame.sprite.Sprite):
         self.pos = self.rect.center
         self.set_image('landing')
 
-        for brick in map:
-            if pygame.sprite.collide_mask(self, brick):
-                self.collided_brick = brick
-                return True
+        if brick := pygame.sprite.spritecollideany(self, map):
+            self.collided_brick = brick
+            return True
 
         return False # still falling
     
@@ -128,28 +119,59 @@ class Bubble(pygame.sprite.Sprite):
         self,
         image,
         dir,
+        group,
         pos=None,
         ):
 
         super(Bubble,  self).__init__()
 
         self.image = image
+        self.original_image = image
         self.pos = pos
         self.rect = self.image.get_rect(center=self.pos)
         self.dir = dir
         self.life = 10
         self.count = 0
+        self.angle = 5
+        self.rot_dir = 1
+        self.original_rot_dir = 0
+        self.group = group
     
-    def walk(self):
-        self.rect.y -= 4
+    def set_original_rot_dir(self, rot_dir, force=False):
+        if not force and self.original_rot_dir:
+            return
+        self.original_rot_dir = rot_dir
+
+    def walk(self, map):
+        brick = pygame.sprite.spritecollideany(self, map)
+        if brick and abs(self.rect.top - brick.rect.top) > abs(self.rect.top - brick.rect.bottom):
+            self.set_original_rot_dir(self.rot_dir)
+            self.rect.x += 2 * self.original_rot_dir
+            if self.rect.right > screen_width or self.rect.left < 0:
+                self.set_original_rot_dir(-self.rot_dir, force=True)
+        elif self.rect.y < 0:
+            self.remove()
+        else:
+            self.rect.y -= 2
+        self.pos = self.rect.center
+        self.angle = self.angle + self.rot_dir
+        if self.angle > 20 or self.angle < -20:
+            self.rot_dir *= -1
+        self.rotate()
     
-    def shoot(self):
-        if self.count < 16:
+    def shoot(self, map):
+        if self.count < 2:
             self.count += 1
-            self.rect.x += 4 * self.dir
+            self.rect.x += 40 * self.dir
             self.pos = self.rect.center
-            return self.shoot()
-        return self.walk()
+            # return self.shoot(map)
+        else:
+            return self.walk(map)
+    
+    def rotate(self):
+        self.image = pygame.transform.rotozoom(self.original_image, self.angle, 1)
+        self.rect = self.image.get_rect(center=self.pos)
+    
+    def remove(self):
+        self.group.remove(self)
         
-    def draw(self, screen):
-        screen.blit(self.image, self.rect)
