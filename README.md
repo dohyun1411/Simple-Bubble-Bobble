@@ -25,7 +25,7 @@ python main.py
 * ← : 왼쪽으로 움직이기
 * → : 오른쪽으로 움직이기
 * ↑ : 점프
-* space : 공격(버블 발사)
+* <space> : 공격(버블 발사)
 
 ### Enemy
 ![reaper](https://user-images.githubusercontent.com/65074958/131250788-50405377-8537-4774-82cc-193cebe35259.png)
@@ -37,4 +37,4 @@ Level 3 Enemy (빠름)
 ![reaper2](https://user-images.githubusercontent.com/65074958/131250797-c855347b-3bbb-4129-ab07-ddbc46c0f32d.png)
 Level 4 Enemy (무적)
 
-Level 4 Enemy는 버블에 갇히지 않는 무적 상태이지만 대신 매우 느립니다. 무적 상태가 풀릴 때까지 피해 다니세요!
+Level 4 Enemy는 버블에 갇히지 않는 무적 상태지만 대신 매우 느립니다. 무적 상태가 풀릴 때까지 피해 다니세요!
