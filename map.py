@@ -19,10 +19,11 @@ class Brick(pygame.sprite.Sprite):
 
 floor_types = [ # _ : brick, . : empty
     '______________________________',
-    '__________..........__________',
+    '___________........___________',
+    '....______________________....',
     '_______.....______....._______',
-    '__________..........____...___',
-    '___...____..........__________',
+    '___...____......______________',
+    '______________......____...___',
     '....____....____..............',
     '..............____....____....',
     '...__...__...__...__...__...__',
@@ -31,7 +32,7 @@ floor_types = [ # _ : brick, . : empty
 
 def create_map(image):
 
-    # 2nd and 3rd floor
+    # 2nd, 3rd and 4th floor
     second = floor_types[random.randint(1, len(floor_types) - 1)]
     third = floor_types[random.randint(1, len(floor_types) - 1)]
     fourth = floor_types[random.randint(1, len(floor_types) - 1)]
