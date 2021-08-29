@@ -24,8 +24,9 @@ player_imgs = {
     'jumping': pygame.image.load(os.path.join(player_img_path, "jumping.png")).convert_alpha(),
     'landing': pygame.image.load(os.path.join(player_img_path, "landing.png")).convert_alpha(),
     'shooting': pygame.image.load(os.path.join(player_img_path, "shooting.png")).convert_alpha(),
+    'dead': pygame.image.load(os.path.join(player_img_path, "dead.png")).convert_alpha(),
+    'ghost': pygame.image.load(os.path.join(player_img_path, "ghost.png")).convert_alpha(),
     'boom': pygame.image.load(os.path.join(player_img_path, "boom.png")).convert_alpha(),
-    'ghost': pygame.image.load(os.path.join(player_img_path, "ghost.png")).convert_alpha()
 }
 bubble_imgs = {
     'bubble': pygame.image.load(os.path.join(player_img_path, "bubble.png")).convert_alpha(),
@@ -147,7 +148,10 @@ while running:
     if new_round:
         if new_round_delay == 0:
             map, brick_dict = create_map(map_img)
-            enemy_num = [1, 2, 3, 5, 7, 10, 15, 20][min(8, round)]
+            if round < 8:
+                enemy_num = [1, 2, 3, 5, 7, 10, 15, 20][round]
+            else:
+                enemy_num = 20 + 10 * (round - 7)
             for _ in range(enemy_num):
                 enemy = Enemy(images=enemy_imgs, map=map, group=enemy_group, list_=enemy_list)
                 enemy_group.add(enemy)
@@ -180,19 +184,18 @@ while running:
     if bubble_delay > 6:
         bubble_delay = 0
 
-    bubble = pygame.sprite.spritecollideany(player, bubble_group)
-    if bubble:
+    if bubble := pygame.sprite.spritecollideany(player, bubble_group):
         bubble.remove()
     
-    if pygame.sprite.spritecollideany(player, enemy_group):
-        if attack_delay and attack_delay > 120:
+    if pygame.sprite.spritecollideany(player, enemy_group) or game_over:
+        if (attack_delay and attack_delay > 120) or game_over:
             attack_delay = 0
             player.dead(screen)
             game_font = pygame.font.SysFont('aladinregular', 60)
             txt_game_over = game_font.render("GAME OVER", True, WHITE)
             rect_game_over = txt_game_over.get_rect(center=(int(screen_width / 2), int(screen_height / 2)))
             screen.blit(txt_game_over, rect_game_over)
-            running = False
+            # running = False
             game_over = True
     
     if attack_delay:

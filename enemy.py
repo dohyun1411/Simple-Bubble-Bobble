@@ -43,6 +43,10 @@ class Enemy(pygame.sprite.Sprite):
         self.turn = 0
         self.prev_action = self.walk
         self.jump_before = False
+        self.original_type = id_
+        self.original_original_image = self.original_image
+        self.original_x_speed = self.x_speed
+        self.dangerous_count = 0
 
     def set_pos(self, pos):
         self.pos = pos
@@ -102,6 +106,16 @@ class Enemy(pygame.sprite.Sprite):
                 self.pos = self.rect.center
 
     def act_randomly(self):
+        self.flip()
+        if self.dangerous_count:
+            self.dangerous_count += 1
+            if self.dangerous_count > 500:
+                self.type = self.original_type
+                self.image = self.images[self.type]
+                self.original_image = self.original_original_image
+                self.x_speed = self.original_x_speed
+                self.dangerous_count = 0
+
         self.max_turn = random.choice([40, 50, 60, 70, 80])
         if self.turn < self.max_turn or self.status in {'landing', 'jumping'}:
             return self.prev_action()
@@ -134,6 +148,13 @@ class Enemy(pygame.sprite.Sprite):
         
     def remove(self):
         self.group.remove(self)
+    
+    def make_dangerous(self):
+        self.type = 'reaper2'
+        self.image = self.images[self.type]
+        self.original_image = self.image
+        self.x_speed = 2
+        self.dangerous_count = 1
 
 
 class PseudoEnemy(pygame.sprite.Sprite):

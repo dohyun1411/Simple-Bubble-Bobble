@@ -32,6 +32,7 @@ class Player(pygame.sprite.Sprite):
         self.standing_walking_count = 0
         self.collided_brick = None
         self.shooting_image_count = 0
+        self.is_dead = False
     
     def get_pos(self):
         return self.pos
@@ -118,8 +119,10 @@ class Player(pygame.sprite.Sprite):
         flipping = True if self.dir == LEFT else False
         ghost_img = pygame.transform.flip(ghost_img, flipping, False)
         screen.blit(ghost_img, self.rect)
-        self.rect.y -= 60
-        screen.blit(self.images['boom'], self.rect)
+        if not self.is_dead:
+            self.rect.y -= 60
+            screen.blit(self.images['boom'], self.rect)
+            self.is_dead = True
 
 
 class Bubble(pygame.sprite.Sprite):
@@ -144,7 +147,7 @@ class Bubble(pygame.sprite.Sprite):
         self.life = 10
         self.count = 0
         self.angle = 5
-        self.rot_dir = 1
+        self.rot_dir = dir
         self.original_rot_dir = 0
         self.group = group
         self.power = 3
@@ -153,25 +156,29 @@ class Bubble(pygame.sprite.Sprite):
         self.enemy = None
         self.count = 0
     
-    def set_original_rot_dir(self, rot_dir, force=False):
+    def set_original_rot_dir(self, angle=None, reverse=None, force=False):
         if not force and self.original_rot_dir:
             return
-        self.original_rot_dir = rot_dir
+        if angle is not None:
+            self.original_rot_dir = 1 if angle > 0 else -1
+            return
+        if reverse is not None:
+            self.original_rot_dir *= -1
 
     def walk(self, map):
         self.power = 0
         brick = pygame.sprite.spritecollideany(self, map)
+        self.angle = self.angle + self.rot_dir
         if brick and abs(self.rect.top - brick.rect.top) > abs(self.rect.top - brick.rect.bottom):
-            self.set_original_rot_dir(self.rot_dir)
+            self.set_original_rot_dir(angle=self.angle)
             self.rect.x += 2 * self.original_rot_dir
             if self.rect.right > screen_width or self.rect.left < 0:
-                self.set_original_rot_dir(-self.rot_dir, force=True)
+                self.set_original_rot_dir(reverse=True, force=True)
         elif self.rect.y < 0:
             self.remove(re=True)
         else:
             self.rect.y -= 2
         self.pos = self.rect.center
-        self.angle = self.angle + self.rot_dir
         if self.angle > 20 or self.angle < -20:
             self.rot_dir *= -1
         self.rotate()
@@ -197,6 +204,7 @@ class Bubble(pygame.sprite.Sprite):
         if self.enemy and re:
             self.group.remove(self)
             self.enemy.set_pos(self.pos)
+            self.enemy.make_dangerous()
             self.enemy.group.add(self.enemy)
             self.screen.blit(self.images['boom'], self.pos)
             return
