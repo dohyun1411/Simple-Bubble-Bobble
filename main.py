@@ -210,6 +210,4 @@ while running:
     
     pygame.display.update()
 
-if game_over:
-    pygame.time.delay(2000)
 pygame.quit()    
