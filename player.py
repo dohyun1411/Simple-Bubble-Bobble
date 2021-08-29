@@ -109,7 +109,17 @@ class Player(pygame.sprite.Sprite):
         return False # still falling
     
     def shoot(self):
+        self.set_status = 'shooting'
         self.set_image('shooting')
+    
+    def dead(self, screen):
+        self.set_status = 'dead'
+        ghost_img = self.images['ghost']
+        flipping = True if self.dir == LEFT else False
+        ghost_img = pygame.transform.flip(ghost_img, flipping, False)
+        screen.blit(ghost_img, self.rect)
+        self.rect.y -= 60
+        screen.blit(self.images['boom'], self.rect)
 
 
 class Bubble(pygame.sprite.Sprite):
@@ -141,6 +151,7 @@ class Bubble(pygame.sprite.Sprite):
         self.status = 0
         self.screen = screen
         self.enemy = None
+        self.count = 0
     
     def set_original_rot_dir(self, rot_dir, force=False):
         if not force and self.original_rot_dir:
@@ -164,6 +175,7 @@ class Bubble(pygame.sprite.Sprite):
         if self.angle > 20 or self.angle < -20:
             self.rot_dir *= -1
         self.rotate()
+        self.set_correct_pos()
     
     def shoot(self, map):
         if self.count < 2:
@@ -181,22 +193,26 @@ class Bubble(pygame.sprite.Sprite):
             self.image = pygame.transform.flip(self.image, flipping, False)
         self.rect = self.image.get_rect(center=self.pos)
     
-    def remove(self, count=0, re=False):
+    def remove(self, re=False):
         if self.enemy and re:
             self.group.remove(self)
             self.enemy.set_pos(self.pos)
             self.enemy.group.add(self.enemy)
+            self.screen.blit(self.images['boom'], self.pos)
             return
-        if count > 60:
-            if self.enemy:
-                self.enemy.list.remove(self.enemy)
-            self.group.remove(self)
-            return
-        count += 1
+        if self.enemy:
+            self.enemy.list.remove(self.enemy)
+        self.group.remove(self)
         self.screen.blit(self.images['boom'], self.pos)
-        return self.remove(count + 1)
 
     def attack(self, enemy):
         self.original_image = self.images[enemy.type]
         self.status = 1
         self.enemy = enemy
+    
+    def set_correct_pos(self):
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > screen_width:
+            self.rect.right = screen_width
+        self.pos = self.rect.center

@@ -17,20 +17,23 @@ class Enemy(pygame.sprite.Sprite):
         super(Enemy,  self).__init__()
         
         self.images = images
-        while True:
-            id_, self.image = random.choice(list(images.items()))
-            if id_ != 'reaper2':
-                break
+        weights = [0.5, 0.0, 0.3, 0.2]
+        id_, self.image = random.choices(list(images.items()), weights=weights)[0]
         self.type = id_
         self.original_image = self.image
         self.is_collided_with_wall = 1
         self.group = group
         self.list = list_
 
-        self.pos = (random.randint(36, screen_width - 36), fourth_y - brick_size)
+        self.pos = (random.randint(36, screen_width - 36), 36)
         self.rect = self.image.get_rect(center=self.pos)
 
-        self.x_speed = random.randint(4, 8)
+        if self.type == 'reaper':
+            self.x_speed = random.randint(2, 4)
+        elif self.type == 'reaper3':
+            self.x_speed = random.randint(5, 7)
+        elif self.type == 'reaper4':
+            self.x_speed = random.randint(8, 10)
         self.y_speed = 4
         self.flipping = False
         self.dir = random.choice([LEFT, RIGHT])

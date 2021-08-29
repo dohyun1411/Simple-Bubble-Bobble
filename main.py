@@ -24,7 +24,7 @@ player_imgs = {
     'jumping': pygame.image.load(os.path.join(player_img_path, "jumping.png")).convert_alpha(),
     'landing': pygame.image.load(os.path.join(player_img_path, "landing.png")).convert_alpha(),
     'shooting': pygame.image.load(os.path.join(player_img_path, "shooting.png")).convert_alpha(),
-    'dead': pygame.image.load(os.path.join(player_img_path, "dead.png")).convert_alpha(),
+    'boom': pygame.image.load(os.path.join(player_img_path, "boom.png")).convert_alpha(),
     'ghost': pygame.image.load(os.path.join(player_img_path, "ghost.png")).convert_alpha()
 }
 bubble_imgs = {
@@ -70,9 +70,12 @@ map, brick_dict = create_map(map_img)
 
 # Event Loop
 running = True
+game_over = False
 round = 0
 new_round = True
-delay = 0
+bubble_delay = 0
+new_round_delay = 0
+attack_delay = 0
 while running:
     clock.tick(fps) # FPS
 
@@ -108,13 +111,15 @@ while running:
     
     # Draw background
     screen.blit(background, (0, 0))
+    round_font = pygame.font.SysFont('comicsansms', 30)
+    txt_round = round_font.render(f"ROUND {round}", True, WHITE)
+    rect_round = txt_round.get_rect(center=(int(screen_width / 2), 60))
+    screen.blit(txt_round, rect_round)
 
     # Draw map
     map.draw(screen)
 
-    # Draw player
-    player.draw(screen)
-
+    # Player
     player.set_dir(player_dir) # Set player direction
 
     if player_dx_left + player_dx_right: # player is walking
@@ -140,14 +145,19 @@ while running:
     
     # Draw enemy
     if new_round:
-        pygame.time.wait(500)
-        enemy_num = [1, 5, 10, 20, 50][round]
-        for _ in range(enemy_num):
-            enemy = Enemy(images=enemy_imgs, map=map, group=enemy_group, list_=enemy_list)
-            enemy_group.add(enemy)
-            enemy_list.append(enemy)
-        new_round = False
-        round += 1
+        if new_round_delay == 0:
+            map, brick_dict = create_map(map_img)
+            enemy_num = [1, 2, 3, 5, 7, 10, 15, 20][min(8, round)]
+            for _ in range(enemy_num):
+                enemy = Enemy(images=enemy_imgs, map=map, group=enemy_group, list_=enemy_list)
+                enemy_group.add(enemy)
+                enemy_list.append(enemy)
+            new_round = False
+            round += 1
+            attack_delay = 1
+        new_round_delay += 1
+        new_round_delay %= 20
+
 
     for enemy in enemy_group:
         enemy.act_randomly()
@@ -162,23 +172,41 @@ while running:
     bubble_enemy = pygame.sprite.groupcollide(bubble_group, enemy_group, False, False)
     for bubble, enemies in bubble_enemy.items():
         enemy = enemies[0]
-        if enemy.type != 'reaper2' and bubble.power and delay == 0:
+        if enemy.type != 'reaper2' and bubble.power and bubble_delay == 0:
             enemy.remove()
             bubble.attack(enemy)
-            delay += 1
-    delay = delay + 1 if delay else 0
-    if delay > 6:
-        delay = 0
+            bubble_delay += 1
+    bubble_delay = bubble_delay + 1 if bubble_delay else 0
+    if bubble_delay > 6:
+        bubble_delay = 0
 
     bubble = pygame.sprite.spritecollideany(player, bubble_group)
     if bubble:
         bubble.remove()
+    
+    if pygame.sprite.spritecollideany(player, enemy_group):
+        if attack_delay and attack_delay > 120:
+            attack_delay = 0
+            player.dead(screen)
+            game_font = pygame.font.SysFont('aladinregular', 60)
+            txt_game_over = game_font.render("GAME OVER", True, WHITE)
+            rect_game_over = txt_game_over.get_rect(center=(int(screen_width / 2), int(screen_height / 2)))
+            screen.blit(txt_game_over, rect_game_over)
+            running = False
+            game_over = True
+    
+    if attack_delay:
+        attack_delay += 1
 
-    print(len(enemy_list))
     if not enemy_list:
         new_round = True
-
+        
+    # Draw player
+    if not game_over:
+        player.draw(screen)
+    
     pygame.display.update()
 
-
+if game_over:
+    pygame.time.delay(2000)
 pygame.quit()    

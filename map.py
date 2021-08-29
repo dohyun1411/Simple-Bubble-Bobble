@@ -1,4 +1,5 @@
 import pygame
+import random
 
 from config import *
 
@@ -19,15 +20,21 @@ class Brick(pygame.sprite.Sprite):
 floor_types = [ # _ : brick, . : empty
     '______________________________',
     '__________..........__________',
-    '_______.....______....._______'
+    '_______.....______....._______',
+    '__________..........____...___',
+    '___...____..........__________',
+    '....____....____..............',
+    '..............____....____....',
+    '...__...__...__...__...__...__',
+    '__...__...__...__...__...__...'
 ]
 
 def create_map(image):
 
     # 2nd and 3rd floor
-    second = floor_types[1]
-    third = floor_types[2]
-    fourth = floor_types[1]
+    second = floor_types[random.randint(1, len(floor_types) - 1)]
+    third = floor_types[random.randint(1, len(floor_types) - 1)]
+    fourth = floor_types[random.randint(1, len(floor_types) - 1)]
 
     # bottom
     bottom = floor_types[0]
