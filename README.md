@@ -34,4 +34,5 @@ Level 2 Enemy (보통)
 Level 3 Enemy (빠름)
 ![reaper4](https://user-images.githubusercontent.com/65074958/131250805-b56b73e1-aba6-4c3f-b2aa-37510c3592af.png)
 Level 4 Enemy (무적)
+
 Level 4 Enemy는 버블에 갇히지 않는 무적 상태이지만 대신 매우 느립니다. 무적 상태가 풀릴 때까지 피해 다니세요!
