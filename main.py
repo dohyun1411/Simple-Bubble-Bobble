@@ -47,13 +47,20 @@ enemy_imgs = {
 
 # Load background images
 background_img_path = os.path.join(cur_path, 'images/background')
-background = pygame.image.load(os.path.join(background_img_path, "night.png"))
+background = pygame.image.load(os.path.join(background_img_path, "night.png")).convert_alpha()
 
 # Load map images
 map_img_path = os.path.join(cur_path, 'images/map')
 map_imgs = {
     'brown': pygame.image.load(os.path.join(map_img_path, "brick.png")).convert_alpha()
 }
+
+sound_path = os.path.join(cur_path, 'sounds')
+pygame.mixer.music.load(os.path.join(sound_path, 'main_theme.mp3'))
+pygame.mixer.music.play(-1)
+jump_sound = pygame.mixer.Sound(os.path.join(sound_path, 'jump.mp3'))
+bubble_sound = pygame.mixer.Sound(os.path.join(sound_path, 'bubble.mp3'))
+bubble_kill_sound = pygame.mixer.Sound(os.path.join(sound_path, 'bubble_kill.mp3'))
 
 # Create a Player
 player = Player(images=player_imgs, screen_info=screen_info)
@@ -92,9 +99,11 @@ while running:
                 player_dir = RIGHT # Set direction to right
                 player_dx_right += player_speed # Move to right
             elif event.key == pygame.K_UP and not is_jumpping: # up key
+                jump_sound.play()
                 is_jumpping = True # Jump
                 player_dy = player_jumping_speed
             elif event.key == pygame.K_SPACE:
+                bubble_sound.play()
                 player.shoot()
                 if player.dir == RIGHT:
                     bubble_pos = (player.get_rect().right, player.get_pos()[1])
@@ -102,7 +111,7 @@ while running:
                     bubble_pos = (player.get_rect().left, player.get_pos()[1])
 
                 bubble_group.add(Bubble(images=bubble_imgs, pos=bubble_pos, dir=player.dir, group=bubble_group, screen=screen))
-
+                
 
         elif event.type == pygame.KEYUP: # keyboard up
             if event.key == pygame.K_LEFT:
@@ -185,6 +194,7 @@ while running:
         bubble_delay = 0
 
     if bubble := pygame.sprite.spritecollideany(player, bubble_group):
+        bubble_kill_sound.play()
         bubble.remove()
     
     if pygame.sprite.spritecollideany(player, enemy_group) or game_over:
