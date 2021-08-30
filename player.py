@@ -20,6 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.image = images[status]
         self.original_image = self.image
         self.status = status
+        self.walking_delay = 0
 
         # assert pos or screen_info, 'Either pos or screen_info must be given to create Charater'
         if pos:
@@ -41,9 +42,7 @@ class Player(pygame.sprite.Sprite):
         return self.rect
 
     def set_image(self, status):
-        """
-        Set image to corresponding status.
-        """
+        """Set image to corresponding status."""
         
         if status == 'shooting':
             self.shooting_image_count = 4
@@ -77,11 +76,13 @@ class Player(pygame.sprite.Sprite):
             self.rect.right = screen_width
         self.pos = self.rect.center
 
-        if self.status != 'walking':
-            self.status = 'walking'
-        elif self.status != 'standing':
-            self.status = 'standing'
-        
+        if self.walking_delay == 0:
+            if self.status != 'walking':
+                self.status = 'walking'
+            elif self.status != 'standing':
+                self.status = 'standing'
+        self.walking_delay = (self.walking_delay + 1) % 8
+
         self.set_image(self.status)
         
     def draw(self, screen):
@@ -200,7 +201,7 @@ class Bubble(pygame.sprite.Sprite):
             self.image = pygame.transform.flip(self.image, flipping, False)
         self.rect = self.image.get_rect(center=self.pos)
     
-    def remove(self, re=False):
+    def remove(self, sound=None, re=False):
         if self.enemy and re:
             self.group.remove(self)
             self.enemy.set_pos(self.pos)
@@ -210,6 +211,8 @@ class Bubble(pygame.sprite.Sprite):
             return
         if self.enemy:
             self.enemy.list.remove(self.enemy)
+            if sound:
+                sound.play()
         self.group.remove(self)
         self.screen.blit(self.images['boom'], self.pos)
 

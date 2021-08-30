@@ -29,12 +29,12 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.pos)
 
         if self.type == 'reaper':
-            self.x_speed = random.randint(2, 4)
+            self.x_speed = random.randint(1, 2)
         elif self.type == 'reaper3':
-            self.x_speed = random.randint(5, 7)
+            self.x_speed = random.randint(3, 4)
         elif self.type == 'reaper4':
-            self.x_speed = random.randint(8, 10)
-        self.y_speed = 4
+            self.x_speed = random.randint(5, 6)
+        self.y_speed = 2
         self.flipping = False
         self.dir = random.choice([LEFT, RIGHT])
         self.map = map
@@ -83,11 +83,12 @@ class Enemy(pygame.sprite.Sprite):
         self.pos = self.rect.center
         brick = pygame.sprite.spritecollideany(self, self.map)
         self.collided_brick = brick
-        if (brick and self.turn > 4 and brick.rect.top + 5 > self.rect.bottom) \
+        if (brick and self.turn > 4 and brick.rect.top + 4 > self.rect.bottom) \
             or self.rect.top < 0:
-            self.turn = 100
-            self.set_correct_pos(force=True)
-            self.status = 'walking'
+            if self.turn > 8:
+                self.turn = 100
+                self.set_correct_pos(force=True)
+                self.status = 'walking'
         self.turn += 1
 
     def land(self):
@@ -153,7 +154,7 @@ class Enemy(pygame.sprite.Sprite):
         self.type = 'reaper2'
         self.image = self.images[self.type]
         self.original_image = self.image
-        self.x_speed = 2
+        self.x_speed = 1
         self.dangerous_count = 1
 
 

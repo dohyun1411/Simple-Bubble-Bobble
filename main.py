@@ -61,6 +61,8 @@ pygame.mixer.music.play(-1)
 jump_sound = pygame.mixer.Sound(os.path.join(sound_path, 'jump.mp3'))
 bubble_sound = pygame.mixer.Sound(os.path.join(sound_path, 'bubble.mp3'))
 bubble_kill_sound = pygame.mixer.Sound(os.path.join(sound_path, 'bubble_kill.mp3'))
+game_over_sound = pygame.mixer.Sound(os.path.join(sound_path, 'game_over.mp3'))
+player_damaged_sound = pygame.mixer.Sound(os.path.join(sound_path, 'player_damaged.mp3'))
 
 # Create a Player
 player = Player(images=player_imgs, screen_info=screen_info)
@@ -79,6 +81,7 @@ map, brick_dict = create_map(map_img)
 # Event Loop
 running = True
 game_over = False
+game_over_sound_cond = True
 round = 0
 new_round = True
 bubble_delay = 0
@@ -194,13 +197,14 @@ while running:
         bubble_delay = 0
 
     if bubble := pygame.sprite.spritecollideany(player, bubble_group):
-        bubble_kill_sound.play()
-        bubble.remove()
+        bubble.remove(bubble_kill_sound)
     
     if pygame.sprite.spritecollideany(player, enemy_group) or game_over:
         if (attack_delay and attack_delay > 120) or game_over:
             attack_delay = 0
             player.dead(screen)
+            if game_over_sound_cond:
+                player_damaged_sound.play()
             game_font = pygame.font.SysFont('aladinregular', 60)
             txt_game_over = game_font.render("GAME OVER", True, WHITE)
             rect_game_over = txt_game_over.get_rect(center=(int(screen_width / 2), int(screen_height / 2)))
@@ -217,6 +221,11 @@ while running:
     # Draw player
     if not game_over:
         player.draw(screen)
+    else:
+        pygame.mixer.music.stop()
+        if game_over_sound_cond:
+            game_over_sound.play()
+            game_over_sound_cond = False
     
     pygame.display.update()
 
