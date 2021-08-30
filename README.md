@@ -16,7 +16,7 @@ python main.py
 ```
 
 ## How to Play the Game
-버블을 발사하여 적을 버블 안에 가두세요. 버블에 가둔 후 터뜨리면 적을 완전히 물리칠 수 있습니다. 만약 제때 터뜨리지 못하여 버블이 천장까지 도달할 경우 버블 안에 갇힌 적은 부활하게 되며 한동안 무적상태가 됩니다.
+버블을 발사하여 적을 버블 안에 가두세요. 버블에 가둔 후 터뜨리면 적을 물리칠 수 있습니다. 만약 제때 터뜨리지 못하여 버블이 천장까지 도달할 경우 버블 안에 갇힌 적은 부활하게 되며 한동안 무적상태가 됩니다.
 
 ### Player
 ![standing](https://user-images.githubusercontent.com/65074958/131250668-7bf9d105-07fe-4cb7-bc60-09ca04c6f79b.png)
@@ -25,7 +25,7 @@ python main.py
 * ← : 왼쪽으로 움직이기
 * → : 오른쪽으로 움직이기
 * ↑ : 점프
-* <space> : 공격(버블 발사)
+* space : 공격(버블 발사)
 
 ### Enemy
 ![reaper](https://user-images.githubusercontent.com/65074958/131250788-50405377-8537-4774-82cc-193cebe35259.png)
