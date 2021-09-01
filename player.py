@@ -172,13 +172,13 @@ class Bubble(pygame.sprite.Sprite):
         self.angle = self.angle + self.rot_dir
         if brick and abs(self.rect.top - brick.rect.top) > abs(self.rect.top - brick.rect.bottom):
             self.set_original_rot_dir(angle=self.angle)
-            self.rect.x += 2 * self.original_rot_dir
+            self.rect.x += 1 * self.original_rot_dir
             if self.rect.right > screen_width or self.rect.left < 0:
                 self.set_original_rot_dir(reverse=True, force=True)
         elif self.rect.y < 0:
             self.remove(re=True)
         else:
-            self.rect.y -= 2
+            self.rect.y -= 1
         self.pos = self.rect.center
         if self.angle > 20 or self.angle < -20:
             self.rot_dir *= -1

@@ -95,7 +95,9 @@ while running:
             running = False
 
         elif event.type == pygame.KEYDOWN: # keyboard down
-            if event.key == pygame.K_LEFT: # left key
+            if event.key == pygame.K_q:
+                running = False
+            elif event.key == pygame.K_LEFT: # left key
                 player_dir = LEFT # Set direction to left
                 player_dx_left -= player_speed # Move to left
             elif event.key == pygame.K_RIGHT: # right key
