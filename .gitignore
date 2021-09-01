@@ -5,3 +5,5 @@ dist
 main.spec
 
 sandbox.py
+
+old_*.py
