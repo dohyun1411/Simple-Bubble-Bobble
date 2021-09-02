@@ -8,9 +8,10 @@ class Direction:
 
 class Character(pygame.sprite.Sprite):
 
-    def __init__(self, screen):
+    def __init__(self, screen, map_):
         super(Character, self).__init__()
         self.screen = screen
+        self.map = map_
 
     @property
     def flip(self):
@@ -48,11 +49,46 @@ class Character(pygame.sprite.Sprite):
         self._rect = rect
         self.pos = rect.center
     
-    def move_to_x(self, dx):
-        self.rect.x += dx
+    @property
+    def dx(self):
+        return self._dx
     
-    def move_to_y(self, dy):
-        self.rect.y += dy
+    @dx.setter
+    def dx(self, dx):
+        self._dx = dx
+        self.dir = Direction.RIGHT if dx >= 0 else Direction.LEFT
+    
+    @property
+    def dx_left(self):
+        return self._dx_left
+    
+    @dx_left.setter
+    def dx_left(self, dx_left):
+        self._dx_left = dx_left
+        try:
+            self.dx = dx_left + self.dx_right
+        except AttributeError:
+            self.dx = dx_left
+    
+    @property
+    def dx_right(self):
+        return self._dx_right
+    
+    @dx_right.setter
+    def dx_right(self, dx_right):
+        self._dx_right = dx_right
+        try:
+            self.dx = self.dx_left + dx_right
+        except AttributeError:
+            self.dx = dx_right
+
+    def move_to_x(self):
+        self.rect.x += self.dx
+        self.rect = self.rect
+    
+    def move_to_y(self):
+        self.rect.y += self.dy
+        self.rect = self.rect
 
     def draw(self):
         self.screen.blit(self.image, self.rect)
