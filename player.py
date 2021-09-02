@@ -1,8 +1,8 @@
 import pygame
 
-from util import Loader
 from screen import ScreenConfig
-from character import Direction, Character
+from map import BrickConfig, Map
+from character import Character, Direction
 
 
 class PlayerConfig:
@@ -16,112 +16,114 @@ class PlayerConfig:
 
     life = 3
 
-    # delay for walking image
-    max_walking_image_delay = 4
+    max_walking_image_delay = 4 # delay for walking image
+    
+    brick_gap = 5 # gap between player and collided brick
 
 
 class Player(Character):
 
-    def __init__(self, screen, map_):
-        super(Player, self).__init__(screen, map_)
+    group = pygame.sprite.Group()
 
-        self.images = Loader.load_player_images()
+    def __init__(self, images):
+        super(Player, self).__init__()
+
+        self.images = images
         self.status = 'standing'
 
         self.dx_left = 0
         self.dx_right = 0
-        # self.dy = 0
-        self.pos = (ScreenConfig.x_offset, ScreenConfig.height - ScreenConfig.y_offset)
+        self.dy = 0
+        # self.pos = (ScreenConfig.x_offset, ScreenConfig.height - ScreenConfig.y_offset)
+        self.pos = (500, ScreenConfig.height - ScreenConfig.y_offset)
 
         self.life = PlayerConfig.life
 
         self.walking_image_delay = 0
+        
+        self.is_jumpping = False
+
+        Player.group.add(self)
 
     @property
     def is_dead(self):
         return self.life == 0
-
-    @property
-    def pos(self):
-        return self._pos
-    
-    @pos.setter
-    def pos(self, pos):
-        self._pos = pos
-        self._rect = self.image.get_rect(center=pos)
-        # self.set_correct_pos()
-
-    # TODO
-    def set_correct_pos(self):
-        if self.status != 'landing':
-            if self.rect.bottom != self.collided_brick.rect.top + 5:
-                self.rect.bottom = self.collided_brick.rect.top + 5
-            self.rect = self.rect
     
     def stand(self):
-        self.status = 'standing'
+        if not self.is_jumpping:
+            self.status = 'standing'
     
     def walk(self):
-        if self.walking_image_delay == 0:
-            if self.status == 'standing':
-                self.status = 'walking'
-            elif self.status == 'walking':
-                self.status = 'standing'
-            else:
-                print("WHILE WALKING status:", self.status)
+        if not self.is_jumpping:
+            if self.walking_image_delay == 0:
+                if self.status != 'walking':
+                    self.status = 'walking'
+                elif self.status != 'standing':
+                    self.status = 'standing'
         self.walking_image_delay += 1
         self.walking_image_delay %= PlayerConfig.max_walking_image_delay
 
         self.move_to_x()
 
     def jump(self):
-        self.move_to_y()
         if self.dy < 0:
+            self.move_to_y()
+            self.dy += PlayerConfig.gravity
+
             self.status = 'jumping'
-            return True # player is jumping
+            self.is_jumpping = True
         else:
             return self.land()
     
     def land(self):
-        self.status = 'landing'
-        if brick := pygame.sprite.spritecollideany(self, self.map_):
-            self.collided_brick = brick
-            return False # landing finished
-        return True # player is landing
+        if self.collided_bricks:
+            self.set_correct_pos()
+        else:
+            self.move_to_y()
+            self.dy += PlayerConfig.gravity
+
+            self.status = 'landing'
+            self.is_jumpping = True
     
+    def set_correct_pos(self):
+        correcting = False
+        if self.dir == Direction.RIGHT:
+            min_left = min(brick.rect.left for brick in self.collided_bricks)
+            if 0 < self.rect.right - min_left < BrickConfig.size / 2:
+                self.rect.right = min_left
+                self.rect = self.rect
+                correcting = True
+        else:
+            max_right = max(brick.rect.right for brick in self.collided_bricks)
+            if 0 < max_right - self.rect.left < BrickConfig.size / 2:
+                self.rect.left = max_right
+                self.rect = self.rect
+                correcting = True
+
+        if not correcting:
+            self.dy = 0
+            self.is_jumpping = False
+            collided_brick_top =  self.collided_bricks[0].rect.top
+            if self.rect.bottom > collided_brick_top + PlayerConfig.brick_gap:
+                self.rect.bottom = collided_brick_top + PlayerConfig.brick_gap
+                self.rect = self.rect
+
+    def move(self):
+        player_brick = pygame.sprite.groupcollide(Player.group, Map.group, False, False)
+        if player_brick:
+            self.collided_bricks = player_brick[self]
+        else:
+            self.collided_bricks = None
+
+        if self.dx:
+            self.walk()
+        else:
+            self.stand()
+
+        if self.is_jumpping:
+            self.jump()
+        else:
+            self.land()
+
     def shoot(self):
         self.status = 'shooting'
-    
-
-if __name__ == '__main__':
-    pygame.init()
-    pygame.display.set_caption('Simple Bubble Bobble')
-    screen = pygame.display.set_mode((1200, 720))
-    clock = pygame.time.Clock()
-    
-    p = Player(screen, '')
-
-    running = True
-    i = 0
-    while running:
-        clock.tick(60)
-        screen.fill((255, 0, 255))
-        if i % 100 == 0:
-            print('POS', p.pos)
-            print('RECT', p.rect)
-        p.draw()
-        i += 1
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    p.dx = PlayerConfig.x_speed
-            elif event.type == pygame.KEYUP:
-                p.dx = 0
-        # print("DX:", p.dx)
-        p.walk()
-        
-        pygame.display.update()
-    pygame.quit()

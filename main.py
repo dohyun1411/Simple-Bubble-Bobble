@@ -11,45 +11,48 @@ from player import Player, PlayerConfig
 class Main:
 
     def __init__(self):
-
         # initialize
         pygame.init()
         pygame.display.set_caption('Simple Bubble Bobble')
 
         self.screen = pygame.display.set_mode(ScreenConfig.width_height)
         self.clock = pygame.time.Clock()
-        self.volume = ScreenConfig.volume
+
+        # create bgm
+        self.bgm = pygame.mixer.music
+        self.bgm.load(os.path.join(Loader.sound_path, 'main_theme.mp3'))
+        self.bgm.set_volume(ScreenConfig.volume)
+
+        # create background
+        self.background_image = Loader.load_background_images()[ScreenConfig.background_image]
+        self.background_pos = ScreenConfig.background_pos
 
         # create a map
-        map_ = Map()
-        self.map = map_.brick_group
+        brick_image = Loader.load_brick_images()['brick']
+        _ = Map(brick_image)
 
         # create a Player
-        self.player = Player(self.screen, self.map)
+        player_images = Loader.load_player_images()
+        self.player = Player(player_images)
 
         self.round = 0
         self.running = True
     
     def run(self):
-
         # play BGM
-        bgm = pygame.mixer.music
-        bgm.load(os.path.join(Loader.sound_path, 'main_theme.mp3'))
-        bgm.set_volume(self.volume)
-        bgm.play(-1)
-
-        # event handler
+        self.bgm.play(-1)
+        
+        # event loop
         while self.running:
             self.clock.tick(ScreenConfig.fps)
-
+            
+            # handle event
             self.handle_event()
 
-            # player
-            if self.player.dx:
-                self.player.walk()
-            else:
-                self.player.stand()
+            # player moving
+            self.player.move()
             
+            # draw
             self.draw()
 
         # quit
@@ -70,22 +73,25 @@ class Main:
 
                 elif event.key == pygame.K_RIGHT:
                     self.player.dx_right = PlayerConfig.x_speed # move right
+                
+                elif event.key == pygame.K_UP:
+                    if not self.player.is_jumpping:
+                        self.player.dy = -PlayerConfig.y_speed # jump
+                        self.player.is_jumpping = True
             
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
                     self.player.dx_left = 0 # stop moving
+
                 elif event.key == pygame.K_RIGHT:
                     self.player.dx_right = 0 # stop moving
 
     def draw(self):
-
         # draw background
-        background_image = Loader.load_background_images()[ScreenConfig.background_image]
-        background_pos = ScreenConfig.background_pos
-        self.screen.blit(background_image, background_pos)
+        self.screen.blit(self.background_image, self.background_pos)
 
         # draw map
-        self.map.draw(self.screen)
+        Map.group.draw(self.screen)
 
         # text round
         round_font = pygame.font.SysFont(ScreenConfig.round_font, ScreenConfig.round_size)
@@ -93,7 +99,8 @@ class Main:
         round_rect = round_text.get_rect(center=ScreenConfig.round_pos)
         self.screen.blit(round_text, round_rect)
 
-        self.player.draw()
+        # draw player
+        Player.group.draw(self.screen)
 
         pygame.display.update()
 

@@ -1,17 +1,18 @@
+from screen import ScreenConfig
 import pygame
 
 
 class Direction:
+
     LEFT = -1
     RIGHT = 1
 
 
 class Character(pygame.sprite.Sprite):
 
-    def __init__(self, screen, map_):
+    def __init__(self):
         super(Character, self).__init__()
-        self.screen = screen
-        self.map = map_
+        self.collided_bricks = None
 
     @property
     def flip(self):
@@ -31,14 +32,14 @@ class Character(pygame.sprite.Sprite):
         self._status = status
         self.original_image = self.images[status]
 
-    # @property
-    # def pos(self):
-    #     return self._pos
+    @property
+    def pos(self):
+        return self._pos
     
-    # @pos.setter
-    # def pos(self, pos):
-    #     self._pos = pos
-    #     self._rect = self.image.get_rect(center=pos)
+    @pos.setter
+    def pos(self, pos):
+        self._pos = pos
+        self._rect = self.image.get_rect(center=pos)
     
     @property
     def rect(self):
@@ -84,11 +85,12 @@ class Character(pygame.sprite.Sprite):
 
     def move_to_x(self):
         self.rect.x += self.dx
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > ScreenConfig.width:
+            self.rect.right = ScreenConfig.width
         self.rect = self.rect
     
     def move_to_y(self):
         self.rect.y += self.dy
         self.rect = self.rect
-
-    def draw(self):
-        self.screen.blit(self.image, self.rect)

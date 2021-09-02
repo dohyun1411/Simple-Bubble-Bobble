@@ -2,19 +2,27 @@ import random
 
 import pygame
 
-from util import Loader
 from screen import ScreenConfig
   
 
 class BrickConfig:
+    
     size = 40
 
+
 class Brick(pygame.sprite.Sprite):
-    def __init__(self, pos):
+
+    def __init__(self, image, x_index, y_index):
         super(Brick, self).__init__()
-        self.image = Loader.load_brick_images()['brick']
-        self.pos = pos
-        self.rect = self.image.get_rect(center=pos)
+
+        self.image = image
+        self.x_index = x_index
+        self.y_index = y_index
+
+        x = x_index * BrickConfig.size + BrickConfig.size / 2
+        y = MapConfig.top_y - y_index * MapConfig.interval
+        self.pos = (x, y)
+        self.rect = self.image.get_rect(center=self.pos)
 
 
 class MapConfig:
@@ -37,9 +45,10 @@ class MapConfig:
 
 
 class Map:
+
+    group = pygame.sprite.Group()
     
-    def __init__(self):
-        self.brick_group = pygame.sprite.Group()
+    def __init__(self, brick_image):
         for floor in range(MapConfig.num_floor):
             if floor == 0: # bottom
                 floor_type = MapConfig.bottom_floor_type
@@ -49,6 +58,4 @@ class Map:
                 
             for i, char in enumerate(floor_type):
                 if char == '_':
-                    x = i * BrickConfig.size + BrickConfig.size / 2
-                    y = MapConfig.top_y - floor * MapConfig.interval
-                    self.brick_group.add(Brick((x, y)))
+                    Map.group.add(Brick(brick_image, i, floor))

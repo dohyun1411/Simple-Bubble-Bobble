@@ -1,4 +1,3 @@
-from old_player import Player
 import os
 
 import pygame
@@ -12,6 +11,7 @@ class Loader:
 
     @staticmethod
     def load_background_images():
+        print("LOAD BACKGROUND IMAGES")
         background_image_path = os.path.join(Loader.image_path, 'background')
         background_images = {
             'night': pygame.image.load(os.path.join(background_image_path, "night.png")).convert_alpha()
@@ -20,14 +20,16 @@ class Loader:
     
     @staticmethod
     def load_brick_images():
+        print("LOAD BRICK IMAGES")
         brick_image_path = os.path.join(Loader.image_path, 'map')
         brick_images = {
-            'brick': pygame.image.load(os.path.join(brick_image_path, "brick.png")).convert_alpha()
+            'brick': pygame.image.load(os.path.join(brick_image_path, "brick2.jpg")).convert_alpha()
         }
         return brick_images
     
     @staticmethod
     def load_player_images():
+        print("LOAD PLAYER IMAGES")
         player_image_path = os.path.join(Loader.image_path, 'player')
         player_images = {
             'standing': pygame.image.load(os.path.join(player_image_path, "standing.png")).convert_alpha(),
@@ -42,6 +44,7 @@ class Loader:
     
     @staticmethod
     def load_player_sound():
+        print("LOAD PLAYER SOUNDS")
         player_sounds = {
             'jump': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'jump.mp3')),
             'damaged': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'player_damaged.mp3')),
