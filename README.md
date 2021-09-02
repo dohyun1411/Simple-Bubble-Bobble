@@ -22,8 +22,8 @@ python main.py
 ![standing](https://user-images.githubusercontent.com/65074958/131250668-7bf9d105-07fe-4cb7-bc60-09ca04c6f79b.png)
 
 조작키
-* ← : 왼쪽으로 움직이기
-* → : 오른쪽으로 움직이기
+* ← : 왼쪽으로 이동
+* → : 오른쪽으로 아동
 * ↑ : 점프
 * space : 공격(버블 발사)
 
