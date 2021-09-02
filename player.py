@@ -18,7 +18,7 @@ class PlayerConfig:
 
     max_walking_image_delay = 4 # delay for walking image
     
-    brick_gap = 5 # gap between player and collided brick
+    brick_intersection = 4 # intersection between player and collided brick
 
 
 class Player(Character):
@@ -31,11 +31,11 @@ class Player(Character):
         self.images = images
         self.status = 'standing'
 
+        self.dir = Direction.RIGHT
         self.dx_left = 0
         self.dx_right = 0
         self.dy = 0
-        # self.pos = (ScreenConfig.x_offset, ScreenConfig.height - ScreenConfig.y_offset)
-        self.pos = (500, ScreenConfig.height - ScreenConfig.y_offset)
+        self.pos = (ScreenConfig.x_offset, ScreenConfig.height - ScreenConfig.y_offset)
 
         self.life = PlayerConfig.life
 
@@ -73,15 +73,14 @@ class Player(Character):
             self.status = 'jumping'
             self.is_jumpping = True
         else:
-            return self.land()
+            return self.fall()
     
-    def land(self):
+    def fall(self):
+        self.move_to_y()
+        self.dy += PlayerConfig.gravity
         if self.collided_bricks:
             self.set_correct_pos()
         else:
-            self.move_to_y()
-            self.dy += PlayerConfig.gravity
-
             self.status = 'landing'
             self.is_jumpping = True
     
@@ -104,8 +103,8 @@ class Player(Character):
             self.dy = 0
             self.is_jumpping = False
             collided_brick_top =  self.collided_bricks[0].rect.top
-            if self.rect.bottom > collided_brick_top + PlayerConfig.brick_gap:
-                self.rect.bottom = collided_brick_top + PlayerConfig.brick_gap
+            if self.rect.bottom > collided_brick_top + PlayerConfig.brick_intersection:
+                self.rect.bottom = collided_brick_top + PlayerConfig.brick_intersection
                 self.rect = self.rect
 
     def move(self):
@@ -123,7 +122,7 @@ class Player(Character):
         if self.is_jumpping:
             self.jump()
         else:
-            self.land()
+            self.fall()
 
     def shoot(self):
         self.status = 'shooting'

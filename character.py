@@ -57,7 +57,10 @@ class Character(pygame.sprite.Sprite):
     @dx.setter
     def dx(self, dx):
         self._dx = dx
-        self.dir = Direction.RIGHT if dx >= 0 else Direction.LEFT
+        if dx > 0:
+            self.dir = Direction.RIGHT
+        elif dx < 0:
+            self.dir = Direction.LEFT
     
     @property
     def dx_left(self):

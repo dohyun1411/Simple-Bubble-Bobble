@@ -23,7 +23,7 @@ class Loader:
         print("LOAD BRICK IMAGES")
         brick_image_path = os.path.join(Loader.image_path, 'map')
         brick_images = {
-            'brick': pygame.image.load(os.path.join(brick_image_path, "brick2.jpg")).convert_alpha()
+            'brick': pygame.image.load(os.path.join(brick_image_path, "brick.png")).convert_alpha()
         }
         return brick_images
     
