@@ -43,11 +43,24 @@ class Loader:
         return player_images
     
     @staticmethod
-    def load_player_sound():
-        print("LOAD PLAYER SOUNDS")
+    def load_sounds():
+        print("LOAD SOUNDS")
         player_sounds = {
-            'jump': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'jump.mp3')),
+            'jumping': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'jump.mp3')),
+            'shooting': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'bubble.mp3')),
             'damaged': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'player_damaged.mp3')),
             
         }
         return player_sounds
+    
+    @staticmethod
+    def load_enemy_images():
+        print("LOAD ENEMY IMAGES")
+        enemy_image_path = os.path.join(Loader.image_path, 'enemy')
+        enemy_images = {
+            'reaper1': pygame.image.load(os.path.join(enemy_image_path, 'reaper.png')).convert_alpha(),
+            'reaper2': pygame.image.load(os.path.join(enemy_image_path, 'reaper2.png')).convert_alpha(), # dangerous
+            'reaper3': pygame.image.load(os.path.join(enemy_image_path, 'reaper3.png')).convert_alpha(),
+            'reaper4': pygame.image.load(os.path.join(enemy_image_path, 'reaper4.png')).convert_alpha()
+        }
+        return enemy_images

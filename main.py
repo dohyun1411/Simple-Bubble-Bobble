@@ -1,11 +1,13 @@
 import os
 
 import pygame
+from pygame.constants import SCALED
 
 from util import Loader
 from screen import ScreenConfig
 from map import Map
 from player import Player, PlayerConfig
+from enemy import Enemy
 
 
 class Main:
@@ -18,25 +20,34 @@ class Main:
         self.screen = pygame.display.set_mode(ScreenConfig.width_height)
         self.clock = pygame.time.Clock()
 
-        # create bgm
+        self.round = 0
+        self.running = True
+
+        # load bgm
         self.bgm = pygame.mixer.music
         self.bgm.load(os.path.join(Loader.sound_path, 'main_theme.mp3'))
         self.bgm.set_volume(ScreenConfig.volume)
+
+        # load sound effect
+        self.sounds = Loader.load_sounds()
+        for sound in self.sounds.values():
+            sound.set_volume(ScreenConfig.volume)
 
         # create background
         self.background_image = Loader.load_background_images()[ScreenConfig.background_image]
         self.background_pos = ScreenConfig.background_pos
 
-        # create a map
+        # create map
         brick_image = Loader.load_brick_images()['brick']
         _ = Map(brick_image)
 
-        # create a Player
+        # create Player
         player_images = Loader.load_player_images()
         self.player = Player(player_images)
 
-        self.round = 0
-        self.running = True
+        # create enemy
+        enemy_images = Loader.load_enemy_images()
+        _ = Enemy(enemy_images, self.round)
     
     def run(self):
         # play BGM
@@ -78,6 +89,7 @@ class Main:
                     if not self.player.is_jumpping:
                         self.player.dy = -PlayerConfig.y_speed # jump
                         self.player.is_jumpping = True
+                        self.sounds['jumping'].play()
             
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT:
@@ -101,6 +113,9 @@ class Main:
 
         # draw player
         Player.group.draw(self.screen)
+
+        # draw enemy
+        Enemy.group.draw(self.screen)
 
         pygame.display.update()
 
