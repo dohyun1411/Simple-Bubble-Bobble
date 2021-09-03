@@ -4,7 +4,7 @@ import pygame
 
 from screen import ScreenConfig
 from map import MapConfig, Map
-from character import Character, Direction
+from character import Direction, Character
 
 
 class EnemyConfig:
@@ -12,15 +12,21 @@ class EnemyConfig:
     name = 'reaper'
     num_type = 4
 
-    max_time_being_dangerous = 500
-    max_action_delay_list = [100, 150, 200]
+    max_time_being_invincible = 500
+    max_action_delay_list = [100, 200, 300]
     max_walking_action_delay = 16
     max_jumping_action_delay = 20
 
     brick_intersection = 20
 
     y_speed = 2
-    x_speed_danger = 1 # x speed for dangerous enemy
+    invincible_x_speed = 1 # x speed for invincible enemy
+
+    flying_x_speed = 4
+    flying_y_speed = 20
+    flying_gravity = 0.5
+    flying_angular_speed = 20
+    max_boom_delay = 6 # time for drawing boom image
 
     walking_weights = [0., 1., 0.]
     walking_jumping_weights = [0., 0.2, 0.8]
@@ -40,16 +46,16 @@ class Enemy(Character):
         self.round = round
 
         # TODO: make id depends on round
-        # self.id = random.randint(1, EnemyConfig.num_type)
-        self.id = 1
+        weights = [0.5, 0.3, 0.2, 0.0]
+        self.id = random.choices(range(1, EnemyConfig.num_type + 1), weights)[0]
 
         if self.id == EnemyConfig.num_type:
-            self.make_dangerous()
+            self.make_invincible()
         else:
             self.x_speed = random.randint(2 * self.id - 1, 2 * self.id)
 
         self.dir = random.choice([Direction.LEFT, Direction.RIGHT])
-        self.dx = self.x_speed
+        self.dx = self.x_speed * self.dir
         self.dy = EnemyConfig.y_speed
         x = random.randint(ScreenConfig.x_offset, ScreenConfig.width - ScreenConfig.x_offset)
         y = ScreenConfig.x_offset
@@ -58,15 +64,19 @@ class Enemy(Character):
         self.collided_brick = None
 
         self.original_id = self.id
-        self.original_original_image = self.original_image
-        self.original_x_speed = self.x_speed
-        self.time_being_dangerous = 0
+        # self.original_x_speed = self.x_speed
+        self.time_being_invincible = 0
 
         self.status = 'walking'
         self.prev_action = self.walk
         self.stand_before = False
         self.jump_before = False
+        self.is_jumpping = False
         self.action_delay = 0
+        self.new_round_delay = 0
+
+        self.is_dead = False
+        self.initial_flying = True
 
         Enemy.group.add(self)
         Enemy.count += 1
@@ -78,8 +88,11 @@ class Enemy(Character):
     @id.setter
     def id(self, id):
         self._id = id
-        image_name = EnemyConfig.name + str(id)
-        self.original_image = self.images[image_name]
+        self.original_image = self.images[self.name]
+    
+    @property
+    def name(self):
+        return EnemyConfig.name + str(self.id)
      
     def move_to_x(self):
         self.rect.x += self.dx
@@ -91,13 +104,10 @@ class Enemy(Character):
             self.dx *= -1
         self.rect = self.rect   
 
-    def make_dangerous(self):
+    def make_invincible(self):
         self.id = EnemyConfig.num_type
-        self.x_speed = EnemyConfig.x_speed_danger
-        self.time_being_dangerous = 1
-    
-    def remove(self):
-        pass
+        self.dx = EnemyConfig.invincible_x_speed * self.dir
+        self.time_being_invincible = 1
 
     def stand(self):
         self.status = 'standing'
@@ -129,7 +139,6 @@ class Enemy(Character):
             pass
         else:
             self.action_delay = max(EnemyConfig.max_action_delay_list)
-            # self.status = 'walking'
             self.is_jumpping = False
         self.action_delay += 1
     
@@ -159,15 +168,29 @@ class Enemy(Character):
     def get_jump_condition(self):
         moved_pos = (self.pos[0], self.pos[1] - MapConfig.interval)
         pseudo_enemy = PseudoEnemy(moved_pos, self.image)
-        if pygame.sprite.spritecollideany(pseudo_enemy, Map.group):
+        if len(pygame.sprite.spritecollide(pseudo_enemy, Map.group, False)) > 1:
             return True
         return False
 
     def act_randomly(self):
+        if self.is_dead:
+            return self.fly()
+
+        if self.new_round_delay < ScreenConfig.new_round_delay:
+            self.new_round_delay += 1
+            return
+
         if brick := pygame.sprite.spritecollideany(self, Map.group):
             self.collided_brick = brick
         else:
             self.collided_brick = None
+        
+        if self.time_being_invincible:
+            self.time_being_invincible += 1
+            if self.time_being_invincible > EnemyConfig.max_time_being_invincible:
+                self.id = self.original_id
+                self.dx = self.x_speed * self.dir
+                self.time_being_invincible = 0
             
         self.max_action_delay = random.choice(EnemyConfig.max_action_delay_list)
         if self.action_delay < self.max_action_delay or self.is_jumpping:
@@ -193,6 +216,25 @@ class Enemy(Character):
         self.stand_before = self.prev_action == self.stand
         self.jump_before = self.prev_action == self.jump
         return self.prev_action()
+    
+    def remove(self):
+        self.is_dead = True
+        Enemy.group.remove(self)
+
+    def fly(self):
+        if self.initial_flying:
+            self.dx = EnemyConfig.flying_x_speed * self.player_dir + self.player_dx
+            self.dy = -EnemyConfig.flying_y_speed
+            self.initial_flying = False
+        else:
+            self.dy += EnemyConfig.flying_gravity
+        self.angle = (self.angle + EnemyConfig.flying_angular_speed) % 360
+        self.move_to_x()
+        self.move_to_y()
+        if self.dy > 0 and pygame.sprite.spritecollideany(self, Map.group):
+            Enemy.group.add(PseudoEnemy(self.pos, self.images['boom']))
+            Enemy.group.remove(self)
+            Enemy.count -= 1
 
 
 class PseudoEnemy(pygame.sprite.Sprite):
@@ -200,4 +242,11 @@ class PseudoEnemy(pygame.sprite.Sprite):
     def __init__(self, pos, image):
         super(PseudoEnemy,  self).__init__()
         self.pos = pos
+        self.image = image
         self.rect = image.get_rect(center=pos)
+        self.boom_delay = 0
+    
+    def act_randomly(self):
+        self.boom_delay += 1
+        if self.boom_delay == EnemyConfig.max_boom_delay:
+            Enemy.group.remove(self)

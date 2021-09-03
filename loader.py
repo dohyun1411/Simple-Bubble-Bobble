@@ -38,7 +38,8 @@ class Loader:
             'falling': pygame.image.load(os.path.join(player_image_path, "falling.png")).convert_alpha(),
             'shooting': pygame.image.load(os.path.join(player_image_path, "shooting.png")).convert_alpha(),
             'dead': pygame.image.load(os.path.join(player_image_path, "dead.png")).convert_alpha(),
-            'ghost': pygame.image.load(os.path.join(player_image_path, "ghost.png")).convert_alpha()
+            'ghost': pygame.image.load(os.path.join(player_image_path, "ghost.png")).convert_alpha(),
+            'heart': pygame.image.load(os.path.join(player_image_path, "heart.png")).convert_alpha()
         }
         return player_images
     
@@ -48,6 +49,7 @@ class Loader:
         player_sounds = {
             'jumping': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'jump.mp3')),
             'shooting': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'bubble.mp3')),
+            'bubble_kill': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'bubble_kill.mp3')),
             'damaged': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'player_damaged.mp3')),
             
         }
@@ -58,9 +60,23 @@ class Loader:
         print("LOAD ENEMY IMAGES")
         enemy_image_path = os.path.join(Loader.image_path, 'enemy')
         enemy_images = {
-            'reaper1': pygame.image.load(os.path.join(enemy_image_path, 'reaper_.png')).convert_alpha(),
-            'reaper2': pygame.image.load(os.path.join(enemy_image_path, 'reaper2.png')).convert_alpha(), # dangerous
-            'reaper3': pygame.image.load(os.path.join(enemy_image_path, 'reaper3.png')).convert_alpha(),
-            'reaper4': pygame.image.load(os.path.join(enemy_image_path, 'reaper4.png')).convert_alpha()
+            'reaper1': pygame.image.load(os.path.join(enemy_image_path, 'reaper.png')).convert_alpha(),
+            'reaper2': pygame.image.load(os.path.join(enemy_image_path, 'reaper3.png')).convert_alpha(),
+            'reaper3': pygame.image.load(os.path.join(enemy_image_path, 'reaper4.png')).convert_alpha(),
+            'reaper4': pygame.image.load(os.path.join(enemy_image_path, 'reaper5.png')).convert_alpha(),
+            'boom': pygame.image.load(os.path.join(enemy_image_path, 'boom.png')).convert_alpha()
+        }
+        return enemy_images
+    
+    @staticmethod
+    def load_bubble_images():
+        print("LOAD BUBBLE IMAGES")
+        bubble_image_path = os.path.join(Loader.image_path, 'bubble')
+        enemy_images = {
+            'normal': pygame.image.load(os.path.join(bubble_image_path, 'bubble.png')).convert_alpha(),
+            'boom': pygame.image.load(os.path.join(bubble_image_path, 'boom.png')).convert_alpha(),
+            'reaper1': pygame.image.load(os.path.join(bubble_image_path, 'reaper_in_bubble.png')).convert_alpha(),
+            'reaper2': pygame.image.load(os.path.join(bubble_image_path, 'reaper3_in_bubble.png')).convert_alpha(),
+            'reaper3': pygame.image.load(os.path.join(bubble_image_path, 'reaper4_in_bubble.png')).convert_alpha()
         }
         return enemy_images

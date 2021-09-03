@@ -1,3 +1,4 @@
+from hashlib import new
 import os
 
 import pygame
@@ -5,8 +6,9 @@ import pygame
 from loader import Loader
 from screen import ScreenConfig
 from map import Map
-from player import Player, PlayerConfig
+from player import PlayerConfig, Player, Heart
 from enemy import Enemy
+from bubble import Bubble
 
 
 class GameLauncher:
@@ -19,8 +21,9 @@ class GameLauncher:
         self.screen = pygame.display.set_mode(ScreenConfig.width_height)
         self.clock = pygame.time.Clock()
 
-        self.round = 0
+        self.round = 1
         self.new_round = True
+        self.gameover = False
         self.running = True
 
         # load bgm
@@ -29,24 +32,26 @@ class GameLauncher:
         self.bgm.set_volume(ScreenConfig.volume)
 
         # load sound effect
-        self.sounds = Loader.load_sounds()
-        for sound in self.sounds.values():
+        sounds = Loader.load_sounds()
+        for sound in sounds.values():
             sound.set_volume(ScreenConfig.volume)
 
-        # create background
+        # load background image
         self.background_image = Loader.load_background_images()[ScreenConfig.background_image]
         self.background_pos = ScreenConfig.background_pos
 
-        # create map
-        brick_image = Loader.load_brick_images()['brick']
-        _ = Map(brick_image)
+        # load map image
+        self.map_image = Loader.load_brick_images()['brick']
 
         # create Player
-        player_images = Loader.load_player_images()
-        self.player = Player(player_images)
+        self.player_images = Loader.load_player_images()
+        self.player = Player(self.player_images, sounds)
         
         # load enemy images
         self.enemy_images = Loader.load_enemy_images()
+
+        # load bubble images
+        self.bubble_images = Loader.load_bubble_images()
     
     def run(self):
         # play BGM
@@ -58,16 +63,43 @@ class GameLauncher:
             
             self.handle_event()
 
+            if self.new_round:
+
+                 # create map
+                Map.group.empty()
+                Map(self.map_image)
+
+                # create enemy
+                for _ in range(self.round):
+                    enemy = Enemy(self.enemy_images, self.round)
+                    enemy.new_round_delay = 0
+                self.new_round = False
+
+                self.new_round_delay = 0
+
+            # create heart
+            Heart.group.empty()
+            for i in range(self.player.life):
+                Heart(ScreenConfig.heart_pos[i], self.player_images['heart'])
+
             # player action
             self.player.move()
 
-            if self.new_round:
-                # create enemy
-                _ = Enemy(self.enemy_images, self.round)
-                self.new_round = False
             # enemy action
             for enemy in Enemy.group:
                 enemy.act_randomly()
+            
+            # bubble action
+            for bubble in Bubble.group:
+                bubble.shoot()
+            
+            # new round
+            if Enemy.count == 0:
+                self.new_round = True
+                self.round += 1
+            
+            # game over
+            self.gameover = self.player.life == 0
 
             self.draw()
 
@@ -94,7 +126,10 @@ class GameLauncher:
                     if not self.player.is_jumpping:
                         self.player.dy = -PlayerConfig.y_speed
                         self.player.is_jumpping = True
-                        self.sounds['jumping'].play()
+                        self.player.sounds['jumping'].play()
+                
+                elif event.key == pygame.K_SPACE: # shoot bubble
+                    self.player.shoot(self.bubble_images)
             
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT: # stop moving
@@ -110,17 +145,32 @@ class GameLauncher:
         # draw map
         Map.group.draw(self.screen)
 
+        # draw heart
+        Heart.group.draw(self.screen)
+
         # text round
         round_font = pygame.font.SysFont(ScreenConfig.round_font, ScreenConfig.round_size)
         round_text = round_font.render(f"ROUND {self.round}", True, ScreenConfig.round_color)
         round_rect = round_text.get_rect(center=ScreenConfig.round_pos)
         self.screen.blit(round_text, round_rect)
+        
+        # draw enemy
+        if self.new_round_delay < ScreenConfig.new_round_delay:
+            if self.new_round_delay % ScreenConfig.blinking_interval in range(ScreenConfig.blinking_interval // 2):
+                Enemy.group.draw(self.screen)
+        else:
+            Enemy.group.draw(self.screen)
 
         # draw player
-        Player.group.draw(self.screen)
-
-        # draw enemy
-        Enemy.group.draw(self.screen)
+        if min(self.new_round_delay, self.player.new_round_delay) < ScreenConfig.new_round_delay:
+            self.new_round_delay += 1
+            if self.new_round_delay % ScreenConfig.blinking_interval in range(ScreenConfig.blinking_interval // 2):
+                Player.group.draw(self.screen)
+        else:
+            Player.group.draw(self.screen)
+        
+        # draw bubble
+        Bubble.group.draw(self.screen)
 
         pygame.display.update()
 

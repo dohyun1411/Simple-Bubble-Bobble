@@ -2,7 +2,9 @@ import pygame
 
 from screen import ScreenConfig
 from map import BrickConfig, Map
-from character import Character, Direction
+from character import Direction, Character
+from enemy import Enemy
+from bubble import Bubble
 
 
 class PlayerConfig:
@@ -14,6 +16,7 @@ class PlayerConfig:
     life = 3
 
     max_walking_image_delay = 4 # delay for walking image
+    max_shooting_image_delay = 8 # delay for shooting image
     
     brick_intersection = 4 # intersection between player and collided brick
 
@@ -22,10 +25,11 @@ class Player(Character):
 
     group = pygame.sprite.Group()
 
-    def __init__(self, images):
+    def __init__(self, images, sounds):
         super(Player, self).__init__()
 
         self.images = images
+        self.sounds = sounds
         self.status = 'standing'
 
         self.dir = Direction.RIGHT
@@ -38,7 +42,12 @@ class Player(Character):
         
         self.collided_bricks = None
 
+        self.is_standing = True
+        self.is_jumpping = False
         self.walking_image_delay = 0
+        self.shooting_image_delay = 0
+
+        self.new_round_delay = 0
 
         Player.group.add(self)
         
@@ -60,11 +69,11 @@ class Player(Character):
         self.rect = self.rect
 
     def stand(self):
-        if not self.is_jumpping:
+        if not self.is_jumpping and self.shooting_image_delay == 0:
             self.status = 'standing'
     
     def walk(self):
-        if not self.is_jumpping:
+        if not self.is_jumpping and self.shooting_image_delay == 0:
             if self.walking_image_delay == 0:
                 if self.status != 'walking':
                     self.status = 'walking'
@@ -79,8 +88,9 @@ class Player(Character):
         if self.dy < 0:
             self.move_to_y()
             self.dy += PlayerConfig.gravity
-
-            self.status = 'jumping'
+            
+            if self.shooting_image_delay == 0:
+                self.status = 'jumping'
             self.is_jumpping = True
         else:
             return self.fall()
@@ -91,7 +101,8 @@ class Player(Character):
         if self.collided_bricks:
             self.correct_pos()
         else:
-            self.status = 'falling'
+            if self.shooting_image_delay == 0:
+                self.status = 'falling'
             self.is_jumpping = True
     
     def correct_pos(self):
@@ -124,15 +135,63 @@ class Player(Character):
         else:
             self.collided_bricks = None
 
+        if self.shooting_image_delay:
+            self.shooting_image_delay += 1
+            if self.shooting_image_delay == PlayerConfig.max_shooting_image_delay:
+                self.shooting_image_delay = 0
+
         if self.dx:
+            self.is_standing = False
             self.walk()
         else:
+            self.is_standing = True
             self.stand()
 
         if self.is_jumpping:
             self.jump()
         else:
             self.fall()
-
-    def shoot(self):
+        
+        self.check_bubble_collision()
+        if self.new_round_delay < ScreenConfig.new_round_delay:
+            self.new_round_delay += 1
+        else:
+            self.check_enemy_collision()
+        
+    def shoot(self, bubble_images):
+        if self.dir == Direction.LEFT:
+            x = self.rect.left
+        else:
+            x = self.rect.right
+        y = self.pos[1]
+        speed = 0 if self.is_standing else PlayerConfig.x_speed
+        Bubble(bubble_images, self.sounds, self.dir, (x, y), speed)
         self.status = 'shooting'
+        self.shooting_image_delay = 1
+    
+    def check_bubble_collision(self):
+        player_bubble = pygame.sprite.groupcollide(Player.group, Bubble.group, False, False)
+        if player_bubble:
+            for bubble in player_bubble[self]:
+                if isinstance(bubble, Bubble) and not bubble.is_shooting:
+                    bubble.player_dir = self.dir
+                    bubble.player_dx = self.dx
+                    bubble.remove()
+    
+    def check_enemy_collision(self):
+        if pygame.sprite.spritecollideany(self, Enemy.group):
+            self.life -= 1
+            if self.life > 0:
+                self.new_round_delay = 0
+
+
+class Heart(pygame.sprite.Sprite):
+
+    group = pygame.sprite.Group()
+
+    def __init__(self, pos, image):
+        super(Heart, self).__init__()
+        self.pos = pos
+        self.image = image
+        self.rect = image.get_rect(center=pos)
+        Heart.group.add(self)

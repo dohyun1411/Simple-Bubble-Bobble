@@ -1,8 +1,6 @@
 
 import pygame
 
-from screen import ScreenConfig
-
 
 class Direction:
 
@@ -14,7 +12,7 @@ class Character(pygame.sprite.Sprite):
 
     def __init__(self):
         super(Character, self).__init__()
-        self.is_jumpping = False
+        self.angle = 0
 
     @property
     def flip(self):
@@ -22,8 +20,12 @@ class Character(pygame.sprite.Sprite):
 
     @property
     def image(self):
-        self._image = pygame.transform.flip(self.original_image, self.flip, False)
+        image = pygame.transform.flip(self.original_image, self.flip, False)
+        self._image = self.rotate_image(image, self.angle)
         return self._image
+    
+    def rotate_image(self, image, angle):
+        return pygame.transform.rotozoom(image, angle, 1)
 
     # @property
     # def status(self):

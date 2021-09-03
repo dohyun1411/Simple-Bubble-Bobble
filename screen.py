@@ -10,8 +10,13 @@ class ScreenConfig:
 
     volume = 0.5
 
+    new_round_delay = 120
+    blinking_interval = 20
+
     background_image = 'night'
     background_pos = (0, 0)
+
+    heart_pos = [(40 * i, 40) for i in range(1, 4)]
 
     WHITE = (255, 255, 255)
     round_font = 'comicsansms'
