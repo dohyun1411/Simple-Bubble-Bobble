@@ -20,6 +20,7 @@ class GameLauncher:
         self.clock = pygame.time.Clock()
 
         self.round = 0
+        self.new_round = True
         self.running = True
 
         # load bgm
@@ -43,10 +44,9 @@ class GameLauncher:
         # create Player
         player_images = Loader.load_player_images()
         self.player = Player(player_images)
-
-        # create enemy
-        enemy_images = Loader.load_enemy_images()
-        _ = Enemy(enemy_images, self.round)
+        
+        # load enemy images
+        self.enemy_images = Loader.load_enemy_images()
     
     def run(self):
         # play BGM
@@ -57,7 +57,18 @@ class GameLauncher:
             self.clock.tick(ScreenConfig.fps)
             
             self.handle_event()
+
+            # player action
             self.player.move()
+
+            if self.new_round:
+                # create enemy
+                _ = Enemy(self.enemy_images, self.round)
+                self.new_round = False
+            # enemy action
+            for enemy in Enemy.group:
+                enemy.act_randomly()
+
             self.draw()
 
         # quit

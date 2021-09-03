@@ -7,7 +7,6 @@ from character import Character, Direction
 
 class PlayerConfig:
 
-    # TODO: make them depend on fps
     x_speed = 6
     y_speed = 20 # jumping speed
     gravity = 1
@@ -36,13 +35,30 @@ class Player(Character):
         self.pos = (ScreenConfig.x_offset, ScreenConfig.height - ScreenConfig.y_offset)
 
         self.life = PlayerConfig.life
+        
+        self.collided_bricks = None
 
         self.walking_image_delay = 0
-        
-        self.is_jumpping = False
 
         Player.group.add(self)
+        
+    @property
+    def status(self):
+        return self._status
     
+    @status.setter
+    def status(self, status):
+        self._status = status
+        self.original_image = self.images[status]
+
+    def move_to_x(self):
+        self.rect.x += self.dx
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > ScreenConfig.width:
+            self.rect.right = ScreenConfig.width
+        self.rect = self.rect
+
     def stand(self):
         if not self.is_jumpping:
             self.status = 'standing'
@@ -73,12 +89,12 @@ class Player(Character):
         self.move_to_y()
         self.dy += PlayerConfig.gravity
         if self.collided_bricks:
-            self.set_correct_pos()
+            self.correct_pos()
         else:
             self.status = 'falling'
             self.is_jumpping = True
     
-    def set_correct_pos(self):
+    def correct_pos(self):
         correcting = False
         if self.dir == Direction.RIGHT:
             min_left = min(brick.rect.left for brick in self.collided_bricks)

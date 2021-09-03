@@ -58,7 +58,7 @@ class Loader:
         print("LOAD ENEMY IMAGES")
         enemy_image_path = os.path.join(Loader.image_path, 'enemy')
         enemy_images = {
-            'reaper1': pygame.image.load(os.path.join(enemy_image_path, 'reaper.png')).convert_alpha(),
+            'reaper1': pygame.image.load(os.path.join(enemy_image_path, 'reaper_.png')).convert_alpha(),
             'reaper2': pygame.image.load(os.path.join(enemy_image_path, 'reaper2.png')).convert_alpha(), # dangerous
             'reaper3': pygame.image.load(os.path.join(enemy_image_path, 'reaper3.png')).convert_alpha(),
             'reaper4': pygame.image.load(os.path.join(enemy_image_path, 'reaper4.png')).convert_alpha()

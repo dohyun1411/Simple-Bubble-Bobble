@@ -14,7 +14,7 @@ class Character(pygame.sprite.Sprite):
 
     def __init__(self):
         super(Character, self).__init__()
-        self.collided_bricks = None
+        self.is_jumpping = False
 
     @property
     def flip(self):
@@ -25,14 +25,14 @@ class Character(pygame.sprite.Sprite):
         self._image = pygame.transform.flip(self.original_image, self.flip, False)
         return self._image
 
-    @property
-    def status(self):
-        return self._status
+    # @property
+    # def status(self):
+    #     return self._status
     
-    @status.setter
-    def status(self, status):
-        self._status = status
-        self.original_image = self.images[status]
+    # @status.setter
+    # def status(self, status):
+    #     self._status = status
+    #     self.original_image = self.images[status]
 
     @property
     def pos(self):
@@ -87,14 +87,6 @@ class Character(pygame.sprite.Sprite):
             self.dx = self.dx_left + dx_right
         except AttributeError:
             self.dx = dx_right
-
-    def move_to_x(self):
-        self.rect.x += self.dx
-        if self.rect.left < 0:
-            self.rect.left = 0
-        elif self.rect.right > ScreenConfig.width:
-            self.rect.right = ScreenConfig.width
-        self.rect = self.rect
     
     def move_to_y(self):
         self.rect.y += self.dy

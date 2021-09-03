@@ -6,9 +6,9 @@ class ScreenConfig:
     x_offset = 36
     y_offset = 60
 
-    fps = 60 # TODO: do not hard code
+    fps = 60
 
-    volume = 0.5 # do not hard code
+    volume = 0.5
 
     background_image = 'night'
     background_pos = (0, 0)
