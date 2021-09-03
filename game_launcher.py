@@ -1,16 +1,15 @@
 import os
 
 import pygame
-from pygame.constants import SCALED
 
-from util import Loader
+from loader import Loader
 from screen import ScreenConfig
 from map import Map
 from player import Player, PlayerConfig
 from enemy import Enemy
 
 
-class Main:
+class GameLauncher:
 
     def __init__(self):
         # initialize
@@ -57,13 +56,8 @@ class Main:
         while self.running:
             self.clock.tick(ScreenConfig.fps)
             
-            # handle event
             self.handle_event()
-
-            # player moving
             self.player.move()
-            
-            # draw
             self.draw()
 
         # quit
@@ -72,31 +66,31 @@ class Main:
     def handle_event(self):
         for event in pygame.event.get():
 
-            if event.type == pygame.QUIT:
-                self.running = False # quit
+            if event.type == pygame.QUIT: # quit
+                self.running = False
             
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    self.running = False # quit
+                if event.key == pygame.K_q: # quit
+                    self.running = False
 
-                elif event.key == pygame.K_LEFT:
-                    self.player.dx_left = -PlayerConfig.x_speed # move left
+                elif event.key == pygame.K_LEFT: # move left
+                    self.player.dx_left = -PlayerConfig.x_speed
 
-                elif event.key == pygame.K_RIGHT:
-                    self.player.dx_right = PlayerConfig.x_speed # move right
+                elif event.key == pygame.K_RIGHT: # move right
+                    self.player.dx_right = PlayerConfig.x_speed
                 
-                elif event.key == pygame.K_UP:
+                elif event.key == pygame.K_UP: # jump
                     if not self.player.is_jumpping:
-                        self.player.dy = -PlayerConfig.y_speed # jump
+                        self.player.dy = -PlayerConfig.y_speed
                         self.player.is_jumpping = True
                         self.sounds['jumping'].play()
             
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT:
-                    self.player.dx_left = 0 # stop moving
+                if event.key == pygame.K_LEFT: # stop moving
+                    self.player.dx_left = 0
 
-                elif event.key == pygame.K_RIGHT:
-                    self.player.dx_right = 0 # stop moving
+                elif event.key == pygame.K_RIGHT: # stop moving
+                    self.player.dx_right = 0
 
     def draw(self):
         # draw background
@@ -124,5 +118,5 @@ class Main:
     
 
 if __name__ == '__main__':
-    main = Main()
-    main.run()
+    gl = GameLauncher()
+    gl.run()

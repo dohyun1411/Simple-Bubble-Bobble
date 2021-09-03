@@ -1,5 +1,7 @@
-from screen import ScreenConfig
+
 import pygame
+
+from screen import ScreenConfig
 
 
 class Direction:

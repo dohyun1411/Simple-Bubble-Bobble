@@ -8,6 +8,7 @@ from character import Character, Direction
 
 class EnemyConfig:
 
+    # TODO: make them depend on fps
     name = "reaper"
     num_type = 4
     max_time_to_be_dangerous = 500

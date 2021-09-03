@@ -7,9 +7,7 @@ from character import Character, Direction
 
 class PlayerConfig:
 
-    width = 40
-    height = 50
-
+    # TODO: make them depend on fps
     x_speed = 6
     y_speed = 20 # jumping speed
     gravity = 1
@@ -44,10 +42,6 @@ class Player(Character):
         self.is_jumpping = False
 
         Player.group.add(self)
-
-    @property
-    def is_dead(self):
-        return self.life == 0
     
     def stand(self):
         if not self.is_jumpping:
@@ -81,7 +75,7 @@ class Player(Character):
         if self.collided_bricks:
             self.set_correct_pos()
         else:
-            self.status = 'landing'
+            self.status = 'falling'
             self.is_jumpping = True
     
     def set_correct_pos(self):
