@@ -13,9 +13,9 @@ class EnemyConfig:
     name = 'reaper'
     num_type = 4
 
-    max_time_being_invincible = 500
+    max_time_being_invincible = 700
     max_walking_action_delay = 16
-    max_action_delay_list_coef = [3, 3, 6, 12]
+    max_action_delay_list_coef = [3, 6, 12, 15]
     max_action_delay_list = [c * 16 for c in max_action_delay_list_coef] # 16 = max_walking_action_delay
     max_jumping_action_delay = 20
 
@@ -30,9 +30,9 @@ class EnemyConfig:
     flying_angular_speed = 20
 
     walking_weights = [0., 1., 0.]
-    walking_jumping_weights = [0., 0.2, 0.8]
-    standing_walking_weights = [0.3, 0.7, 0.]
-    standing_walking_jumping_weights = [0.1, 0.1, 0.8]
+    walking_jumping_weights = [0., 0.5, 0.5]
+    standing_walking_weights = [0.4, 0.6, 0.]
+    standing_walking_jumping_weights = [0.3, 0.3, 0.4]
 
 
 class Enemy(Character):

@@ -74,7 +74,7 @@ class GameLauncher:
                 if self.round - 1 < len(ScreenConfig.enemy_num_list):
                     enemy_num = ScreenConfig.enemy_num_list[self.round - 1]
                 else:
-                    enemy_num += 5
+                    enemy_num += 10
                 for _ in range(enemy_num):
                     enemy = Enemy(self.enemy_images, self.round)
                     enemy.new_round_delay = 0

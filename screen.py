@@ -10,7 +10,7 @@ class ScreenConfig:
 
     volume = 0.5
 
-    enemy_num_list = [1, 2, 3, 5, 7, 10]
+    enemy_num_list = [1, 2, 3, 5, 7, 10, 15, 20]
     new_round_delay = 120
     player_damaged_delay = 120
     blinking_interval = 20
