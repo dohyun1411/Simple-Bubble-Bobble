@@ -130,7 +130,7 @@ class Bubble(Character):
         if self.status != 'normal' or not self.is_shooting:
             return None
         if enemy := pygame.sprite.spritecollideany(self, Enemy.group):
-            if enemy.id != EnemyConfig.num_type:
+            if enemy.id != EnemyConfig.num_type and not enemy.is_dead:
                 return enemy
         return None
 
