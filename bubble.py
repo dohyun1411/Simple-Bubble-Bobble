@@ -57,6 +57,14 @@ class Bubble(Character):
         self.original_image = self.images[status]
 
     @property
+    def dx(self):
+        return self._dx
+    
+    @dx.setter
+    def dx(self, dx):
+        self._dx = dx
+
+    @property
     def enemy(self):
         return self._enemy
     
@@ -85,13 +93,9 @@ class Bubble(Character):
     def move_to_x_while_jumping(self):
         self.rect.x += self.dx
         if self.rect.left < 0:
-            temp_dir = self.dir
             self.dx *= -1
-            self.dir = temp_dir
         elif self.rect.right > ScreenConfig.width:
-            temp_dir = self.dir
             self.dx *= -1
-            self.dir = temp_dir
         self.rect = self.rect
 
     def jump(self):
@@ -99,9 +103,7 @@ class Bubble(Character):
         if brick and abs(self.rect.top - brick.rect.top) > abs(self.rect.top - brick.rect.bottom):
             if not self.initial_dir:
                 self.initial_dir = (self.angle > 0) * 2 - 1
-                temp_dir = self.dir
                 self.dx = self.initial_dir * BubbleConfig.x_speed
-                self.dir = temp_dir
             self.move_to_x_while_jumping()
         else:
             self.move_to_y()
@@ -116,6 +118,7 @@ class Bubble(Character):
             if self.player_dir:
                 self.enemy.player_dir = self.player_dir
                 self.enemy.player_dx = self.player_dx
+                self.enemy.player_dy = self.player_dy
             if revival:
                 self.enemy.is_dead = False
                 self.enemy.make_invincible()
@@ -128,7 +131,7 @@ class Bubble(Character):
         if self.status != 'normal' or not self.is_shooting:
             return None
         if enemy := pygame.sprite.spritecollideany(self, Enemy.group):
-            if enemy.id != EnemyConfig.num_type:
+            if isinstance(enemy, Enemy) and enemy.id != EnemyConfig.num_type:
                 return enemy
         return None
 
@@ -137,8 +140,8 @@ class Bubble(Character):
             self.enemy = enemy
             self.is_shooting = False
         if self.is_shooting:
-            self.move_to_x()
             self.dx -= BubbleConfig.x_acc * self.dir
+            self.move_to_x()
             if self.dx == 0:
                 self.is_shooting = False
         else:

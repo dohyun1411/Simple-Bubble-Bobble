@@ -11,7 +11,6 @@ class Loader:
 
     @staticmethod
     def load_background_images():
-        print("LOAD BACKGROUND IMAGES")
         background_image_path = os.path.join(Loader.image_path, 'background')
         background_images = {
             'night': pygame.image.load(os.path.join(background_image_path, "night.png")).convert_alpha()
@@ -20,7 +19,6 @@ class Loader:
     
     @staticmethod
     def load_brick_images():
-        print("LOAD BRICK IMAGES")
         brick_image_path = os.path.join(Loader.image_path, 'map')
         brick_images = {
             'brick': pygame.image.load(os.path.join(brick_image_path, "brick.png")).convert_alpha()
@@ -29,7 +27,6 @@ class Loader:
     
     @staticmethod
     def load_player_images():
-        print("LOAD PLAYER IMAGES")
         player_image_path = os.path.join(Loader.image_path, 'player')
         player_images = {
             'standing': pygame.image.load(os.path.join(player_image_path, "standing.png")).convert_alpha(),
@@ -45,19 +42,17 @@ class Loader:
     
     @staticmethod
     def load_sounds():
-        print("LOAD SOUNDS")
         player_sounds = {
             'jumping': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'jump.mp3')),
             'shooting': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'bubble.mp3')),
             'bubble_kill': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'bubble_kill.mp3')),
             'damaged': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'player_damaged.mp3')),
-            
+            'gameover': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'game_over.mp3'))
         }
         return player_sounds
     
     @staticmethod
     def load_enemy_images():
-        print("LOAD ENEMY IMAGES")
         enemy_image_path = os.path.join(Loader.image_path, 'enemy')
         enemy_images = {
             'reaper1': pygame.image.load(os.path.join(enemy_image_path, 'reaper.png')).convert_alpha(),
@@ -70,7 +65,6 @@ class Loader:
     
     @staticmethod
     def load_bubble_images():
-        print("LOAD BUBBLE IMAGES")
         bubble_image_path = os.path.join(Loader.image_path, 'bubble')
         enemy_images = {
             'normal': pygame.image.load(os.path.join(bubble_image_path, 'bubble.png')).convert_alpha(),

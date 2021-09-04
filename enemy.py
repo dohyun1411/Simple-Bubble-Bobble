@@ -22,7 +22,7 @@ class EnemyConfig:
     y_speed = 2
     invincible_x_speed = 1 # x speed for invincible enemy
 
-    flying_x_speed = 4
+    flying_x_speed_range = range(1, 1 + 6) # 6 is player x_speed
     flying_y_speed = 20
     flying_gravity = 0.5
     flying_angular_speed = 20
@@ -171,6 +171,20 @@ class Enemy(Character):
         if len(pygame.sprite.spritecollide(pseudo_enemy, Map.group, False)) > 1:
             return True
         return False
+    
+    def set_collided_bricks(self):
+        if brick := pygame.sprite.spritecollideany(self, Map.group):
+            self.collided_brick = brick
+        else:
+            self.collided_brick = None
+        
+    def set_time_being_invincible(self):
+        if self.time_being_invincible:
+            self.time_being_invincible += 1
+            if self.time_being_invincible > EnemyConfig.max_time_being_invincible:
+                self.id = self.original_id
+                self.dx = self.x_speed * self.dir
+                self.time_being_invincible = 0
 
     def act_randomly(self):
         if self.is_dead:
@@ -179,19 +193,10 @@ class Enemy(Character):
         if self.new_round_delay < ScreenConfig.new_round_delay:
             self.new_round_delay += 1
             return
-
-        if brick := pygame.sprite.spritecollideany(self, Map.group):
-            self.collided_brick = brick
-        else:
-            self.collided_brick = None
         
-        if self.time_being_invincible:
-            self.time_being_invincible += 1
-            if self.time_being_invincible > EnemyConfig.max_time_being_invincible:
-                self.id = self.original_id
-                self.dx = self.x_speed * self.dir
-                self.time_being_invincible = 0
-            
+        self.set_collided_bricks()
+        self.set_time_being_invincible()
+        
         self.max_action_delay = random.choice(EnemyConfig.max_action_delay_list)
         if self.action_delay < self.max_action_delay or self.is_jumpping:
             return self.prev_action()
@@ -223,8 +228,9 @@ class Enemy(Character):
 
     def fly(self):
         if self.initial_flying:
-            self.dx = EnemyConfig.flying_x_speed * self.player_dir + self.player_dx
-            self.dy = -EnemyConfig.flying_y_speed
+            flying_x_speed = random.choice(EnemyConfig.flying_x_speed_range)
+            self.dx = flying_x_speed * self.player_dir + self.player_dx
+            self.dy = -EnemyConfig.flying_y_speed + self.player_dy / 4
             self.initial_flying = False
         else:
             self.dy += EnemyConfig.flying_gravity

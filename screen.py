@@ -11,15 +11,22 @@ class ScreenConfig:
     volume = 0.5
 
     new_round_delay = 120
+    player_damaged_delay = 120
     blinking_interval = 20
 
     background_image = 'night'
     background_pos = (0, 0)
 
-    heart_pos = [(40 * i, 40) for i in range(1, 4)]
+    num_heart = 2
+    heart_pos = [(50 * i, 50) for i in range(1, num_heart + 1)]
 
     WHITE = (255, 255, 255)
     round_font = 'comicsansms'
     round_size = 30
     round_color = WHITE
     round_pos = (width / 2, y_offset)
+
+    gameover_font = 'aladinregular'
+    gameover_size = 60
+    gameover_color = WHITE
+    gameover_pos =(width / 2, height / 2)

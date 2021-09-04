@@ -24,6 +24,7 @@ class GameLauncher:
         self.round = 1
         self.new_round = True
         self.gameover = False
+        self.initial_gameover_sound = True
         self.running = True
 
         # load bgm
@@ -32,8 +33,8 @@ class GameLauncher:
         self.bgm.set_volume(ScreenConfig.volume)
 
         # load sound effect
-        sounds = Loader.load_sounds()
-        for sound in sounds.values():
+        self.sounds = Loader.load_sounds()
+        for sound in self.sounds.values():
             sound.set_volume(ScreenConfig.volume)
 
         # load background image
@@ -43,9 +44,9 @@ class GameLauncher:
         # load map image
         self.map_image = Loader.load_brick_images()['brick']
 
-        # create Player
+        # create player
         self.player_images = Loader.load_player_images()
-        self.player = Player(self.player_images, sounds)
+        self.player = Player(self.player_images, self.sounds)
         
         # load enemy images
         self.enemy_images = Loader.load_enemy_images()
@@ -84,6 +85,8 @@ class GameLauncher:
 
             # player action
             self.player.move()
+            self.player.new_round_delay = self.new_round_delay
+            self.new_round_delay += 1
 
             # enemy action
             for enemy in Enemy.group:
@@ -99,7 +102,11 @@ class GameLauncher:
                 self.round += 1
             
             # game over
-            self.gameover = self.player.life == 0
+            self.gameover = self.player.life <= 0
+            if self.initial_gameover_sound and self.gameover:
+                self.bgm.stop()
+                self.sounds['gameover'].play()
+                self.initial_gameover_sound = False
 
             self.draw()
 
@@ -126,10 +133,12 @@ class GameLauncher:
                     if not self.player.is_jumpping:
                         self.player.dy = -PlayerConfig.y_speed
                         self.player.is_jumpping = True
-                        self.player.sounds['jumping'].play()
+                        self.sounds['jumping'].play()
                 
                 elif event.key == pygame.K_SPACE: # shoot bubble
-                    self.player.shoot(self.bubble_images)
+                    if not self.new_round_delay < ScreenConfig.new_round_delay \
+                        and not 0 < self.player.damaged_delay < ScreenConfig.new_round_delay:
+                        self.player.shoot(self.bubble_images)
             
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT: # stop moving
@@ -153,7 +162,14 @@ class GameLauncher:
         round_text = round_font.render(f"ROUND {self.round}", True, ScreenConfig.round_color)
         round_rect = round_text.get_rect(center=ScreenConfig.round_pos)
         self.screen.blit(round_text, round_rect)
-        
+
+        # text gameover
+        if self.gameover:
+            gameover_font = pygame.font.SysFont(ScreenConfig.gameover_font, ScreenConfig.gameover_size)
+            gameover_text = gameover_font.render("GAME OVER", True, ScreenConfig.gameover_color)
+            gameover_rect = gameover_text.get_rect(center=ScreenConfig.gameover_pos)
+            self.screen.blit(gameover_text, gameover_rect)
+
         # draw enemy
         if self.new_round_delay < ScreenConfig.new_round_delay:
             if self.new_round_delay % ScreenConfig.blinking_interval in range(ScreenConfig.blinking_interval // 2):
@@ -162,8 +178,8 @@ class GameLauncher:
             Enemy.group.draw(self.screen)
 
         # draw player
-        if min(self.new_round_delay, self.player.new_round_delay) < ScreenConfig.new_round_delay:
-            self.new_round_delay += 1
+        if self.new_round_delay < ScreenConfig.new_round_delay \
+            or 0 < self.player.damaged_delay < ScreenConfig.new_round_delay:
             if self.new_round_delay % ScreenConfig.blinking_interval in range(ScreenConfig.blinking_interval // 2):
                 Player.group.draw(self.screen)
         else:
@@ -176,7 +192,7 @@ class GameLauncher:
 
     def quit(self):
         pygame.quit()
-    
+
 
 if __name__ == '__main__':
     gl = GameLauncher()

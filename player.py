@@ -13,7 +13,7 @@ class PlayerConfig:
     y_speed = 20 # jumping speed
     gravity = 1
 
-    life = 3
+    life = ScreenConfig.num_heart
 
     max_walking_image_delay = 4 # delay for walking image
     max_shooting_image_delay = 8 # delay for shooting image
@@ -48,6 +48,7 @@ class Player(Character):
         self.shooting_image_delay = 0
 
         self.new_round_delay = 0
+        self.damaged_delay = 0
 
         Player.group.add(self)
         
@@ -127,18 +128,24 @@ class Player(Character):
             if self.rect.bottom > collided_brick_top + PlayerConfig.brick_intersection:
                 self.rect.bottom = collided_brick_top + PlayerConfig.brick_intersection
                 self.rect = self.rect
-
-    def move(self):
+    
+    def set_collided_bricks(self):
         player_brick = pygame.sprite.groupcollide(Player.group, Map.group, False, False)
         if player_brick:
             self.collided_bricks = player_brick[self]
         else:
             self.collided_bricks = None
-
+    
+    def set_shooting_image_delay(self):
         if self.shooting_image_delay:
             self.shooting_image_delay += 1
             if self.shooting_image_delay == PlayerConfig.max_shooting_image_delay:
                 self.shooting_image_delay = 0
+                
+    def move(self):
+
+        self.set_collided_bricks()
+        self.set_shooting_image_delay()
 
         if self.dx:
             self.is_standing = False
@@ -153,10 +160,7 @@ class Player(Character):
             self.fall()
         
         self.check_bubble_collision()
-        if self.new_round_delay < ScreenConfig.new_round_delay:
-            self.new_round_delay += 1
-        else:
-            self.check_enemy_collision()
+        self.check_enemy_collision()
         
     def shoot(self, bubble_images):
         if self.dir == Direction.LEFT:
@@ -176,13 +180,28 @@ class Player(Character):
                 if isinstance(bubble, Bubble) and not bubble.is_shooting:
                     bubble.player_dir = self.dir
                     bubble.player_dx = self.dx
+                    bubble.player_dy = self.dy
                     bubble.remove()
     
     def check_enemy_collision(self):
-        if pygame.sprite.spritecollideany(self, Enemy.group):
-            self.life -= 1
-            if self.life > 0:
-                self.new_round_delay = 0
+        if self.life > 0:
+            if self.new_round_delay < ScreenConfig.new_round_delay:
+                pass
+            elif 0 < self.damaged_delay < ScreenConfig.player_damaged_delay:
+                self.damaged_delay += 1
+            else:
+                self._check_enemy_collision()
+        else:
+            self.status = 'ghost'
+    
+    def _check_enemy_collision(self):
+        if enemy := pygame.sprite.spritecollideany(self, Enemy.group):
+            if isinstance(enemy, Enemy) and not enemy.is_dead:
+                if self.life > 0:
+                    self.sounds['damaged'].play()
+                    self.life -= 1
+                    if self.life > 0:
+                        self.damaged_delay = 1
 
 
 class Heart(pygame.sprite.Sprite):
