@@ -1,18 +1,16 @@
 # Simple-Bubble-Bobble
 pygame을 이용한 Bubble Bobble 게임입니다.
 
-## Requirement
+## Requirements
 pygame 패키지를 설치해주세요.
 ```
 pip install pygame
 ```
 
 ## How to Run
-이 repository를 clone한 후 ```main.py```를 실행해주세요.
+```gamelauncher.py```를 실행해주세요.
 ```
-git clone https://github.com/dohyun1411/Simple-Bubble-Bobble.git
-cd Simple-Bubble-Bobble
-python main.py
+python gamelauncher.py
 ```
 
 ## How to Play the Game

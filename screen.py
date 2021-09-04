@@ -17,7 +17,7 @@ class ScreenConfig:
     background_image = 'night'
     background_pos = (0, 0)
 
-    num_heart = 2
+    num_heart = 3
     heart_pos = [(50 * i, 50) for i in range(1, num_heart + 1)]
 
     WHITE = (255, 255, 255)
