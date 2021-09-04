@@ -1,73 +1,61 @@
-import pygame
 import random
 
-from config import *
+import pygame
+
+from screen import ScreenConfig
+  
+
+class BrickConfig:
+    
+    size = 40
 
 
 class Brick(pygame.sprite.Sprite):
-    def __init__(self, image, pos):
+
+    def __init__(self, image, x_index, y_index):
         super(Brick, self).__init__()
+
         self.image = image
-        self.rect = self.image.get_rect(center=pos)
-        self.pos = pos
+        self.x_index = x_index
+        self.y_index = y_index
+
+        x = x_index * BrickConfig.size + BrickConfig.size / 2
+        y = MapConfig.top_y - y_index * MapConfig.interval
+        self.pos = (x, y)
+        self.rect = self.image.get_rect(center=self.pos)
+
+
+class MapConfig:
+
+    num_floor = 4
+    floor_types = [ # _ : brick, . : empty
+        '___________........___________',
+        '....______________________....',
+        '_______.....______....._______',
+        '___...____......______________',
+        '______________......____...___',
+        '....____....______............',
+        '............______....____....',
+        '...__...__...__...__...__...__',
+        '__...__...__...__...__...__...'
+    ]
+    bottom_floor_type = '______________________________'
+    interval = 180 # TODO: make interval depend on num_floor
+    top_y = ScreenConfig.height - BrickConfig.size / 2
+
+
+class Map:
+
+    group = pygame.sprite.Group()
     
-    def get_pos(self):
-        return self.pos
-
-    def get_rect(self):
-        return self.rect
-
-floor_types = [ # _ : brick, . : empty
-    '______________________________',
-    '___________........___________',
-    '....______________________....',
-    '_______.....______....._______',
-    '___...____......______________',
-    '______________......____...___',
-    '....____....______............',
-    '............______....____....',
-    '...__...__...__...__...__...__',
-    '__...__...__...__...__...__...'
-]
-
-def create_map(image):
-
-    # 2nd, 3rd and 4th floor
-    second = floor_types[random.randint(1, len(floor_types) - 1)]
-    third = floor_types[random.randint(1, len(floor_types) - 1)]
-    fourth = floor_types[random.randint(1, len(floor_types) - 1)]
-
-    # bottom
-    bottom = floor_types[0]
-    
-    brick_group = pygame.sprite.Group()
-    brick_dict = {} # pos: Brick
-
-    for idx, char in enumerate(fourth):
-        if char == '_':
-            x = idx * brick_size + brick_size // 2
-            y = fourth_y
-            brick_dict[(x, y)] = Brick(image, (x, y))
-
-    for idx, char in enumerate(third):
-        if char == '_':
-            x = idx * brick_size + brick_size // 2
-            y = third_y
-            brick_dict[(x, y)] = Brick(image, (x, y))
-
-    for idx, char in enumerate(second):
-        if char == '_':
-            x = idx * brick_size + brick_size // 2
-            y = second_y
-            brick_dict[(x, y)] = Brick(image, (x, y))
-
-    for idx, char in enumerate(bottom):
-        if char == '_':
-            x = idx * brick_size + brick_size // 2
-            y = first_y
-            brick_dict[(x, y)] = Brick(image, (x, y))
-
-    for brick in brick_dict.values():
-        brick_group.add(brick)
-
-    return brick_group, brick_dict
+    def __init__(self, brick_image):
+        for floor in range(MapConfig.num_floor):
+            if floor == 0: # bottom
+                floor_type = MapConfig.bottom_floor_type
+            else:
+                random_index = random.randint(0, len(MapConfig.floor_types) - 1)
+                floor_type = MapConfig.floor_types[random_index]
+                
+            for i, char in enumerate(floor_type):
+                if char == '_':
+                    Map.group.add(Brick(brick_image, i, floor))

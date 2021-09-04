@@ -1,165 +1,258 @@
-import pygame
 import random
 
-from config import *
+import pygame
+
+from screen import ScreenConfig
+from map import MapConfig, Map
+from character import Direction, Character
 
 
-class Enemy(pygame.sprite.Sprite):
+class EnemyConfig:
+    
+    name = 'reaper'
+    num_type = 4
 
-    def __init__(
-        self,
-        images,
-        map,
-        group,
-        list_
-        ):
+    max_time_being_invincible = 500
+    max_action_delay_list = [100, 200, 300]
+    max_walking_action_delay = 16
+    max_jumping_action_delay = 20
 
-        super(Enemy,  self).__init__()
-        
+    brick_intersection = 20
+
+    y_speed = 2
+    invincible_x_speed = 1 # x speed for invincible enemy
+
+    flying_x_speed_range = range(1, 1 + 6) # 6 is player x_speed
+    flying_y_speed = 20
+    flying_gravity = 0.5
+    flying_angular_speed = 20
+    max_boom_delay = 6 # time for drawing boom image
+
+    walking_weights = [0., 1., 0.]
+    walking_jumping_weights = [0., 0.2, 0.8]
+    standing_walking_weights = [0.2, 0.8, 0.]
+    standing_walking_jumping_weights = [0.2, 0.2, 0.6]
+
+
+class Enemy(Character):
+
+    group = pygame.sprite.Group()
+    count = 0
+
+    def __init__(self, images, round):
+        super(Enemy, self).__init__()
+
         self.images = images
-        weights = [0.5, 0.0, 0.3, 0.2]
-        id_, self.image = random.choices(list(images.items()), weights=weights)[0]
-        self.type = id_
-        self.original_image = self.image
-        self.is_collided_with_wall = 1
-        self.group = group
-        self.list = list_
+        self.round = round
 
-        self.pos = (random.randint(36, screen_width - 36), 36)
-        self.rect = self.image.get_rect(center=self.pos)
+        # TODO: make id depends on round
+        weights = [0.5, 0.3, 0.2, 0.0]
+        self.id = random.choices(range(1, EnemyConfig.num_type + 1), weights)[0]
 
-        if self.type == 'reaper':
-            self.x_speed = random.randint(1, 2)
-        elif self.type == 'reaper3':
-            self.x_speed = random.randint(3, 4)
-        elif self.type == 'reaper4':
-            self.x_speed = random.randint(5, 6)
-        self.y_speed = 2
-        self.flipping = False
-        self.dir = random.choice([LEFT, RIGHT])
-        self.map = map
+        if self.id == EnemyConfig.num_type:
+            self.make_invincible()
+        else:
+            self.x_speed = random.randint(2 * self.id - 1, 2 * self.id)
+
+        self.dir = random.choice([Direction.LEFT, Direction.RIGHT])
+        self.dx = self.x_speed * self.dir
+        self.dy = EnemyConfig.y_speed
+        x = random.randint(ScreenConfig.x_offset, ScreenConfig.width - ScreenConfig.x_offset)
+        y = ScreenConfig.x_offset
+        self.pos = (x, y)
+        
         self.collided_brick = None
-        self.status = 'walking'
-        self.turn = 0
-        self.prev_action = self.walk
-        self.jump_before = False
-        self.original_type = id_
-        self.original_original_image = self.original_image
-        self.original_x_speed = self.x_speed
-        self.dangerous_count = 0
 
-    def set_pos(self, pos):
-        self.pos = pos
-        self.rect.center =pos
+        self.original_id = self.id
+        # self.original_x_speed = self.x_speed
+        self.time_being_invincible = 0
+
+        self.status = 'walking'
+        self.prev_action = self.walk
+        self.stand_before = False
+        self.jump_before = False
+        self.is_jumpping = False
+        self.action_delay = 0
+        self.new_round_delay = 0
+
+        self.is_dead = False
+        self.initial_flying = True
+
+        Enemy.group.add(self)
+        Enemy.count += 1
+
+    @property
+    def id(self):
+        return self._id
+    
+    @id.setter
+    def id(self, id):
+        self._id = id
+        self.original_image = self.images[self.name]
+    
+    @property
+    def name(self):
+        return EnemyConfig.name + str(self.id)
+     
+    def move_to_x(self):
+        self.rect.x += self.dx
+        if self.rect.left < 0:
+            self.dir *= -1
+            self.dx *= -1
+        elif self.rect.right > ScreenConfig.width:
+            self.dir *= -1
+            self.dx *= -1
+        self.rect = self.rect   
+
+    def make_invincible(self):
+        self.id = EnemyConfig.num_type
+        self.dx = EnemyConfig.invincible_x_speed * self.dir
+        self.time_being_invincible = 1
 
     def stand(self):
-        if self.turn % 10 == 1:
+        self.status = 'standing'
+        self.is_jumpping = False
+        if self.action_delay % EnemyConfig.max_walking_action_delay == 0:
             self.dir *= -1
-            self.flip()
-        self.turn += 1
-
+            self.dx *= -1
+        self.action_delay += 1
+    
     def walk(self):
-        if brick := pygame.sprite.spritecollideany(self, self.map):
-            self.collided_brick = brick
+        if not self.collided_brick:
+            return self.fall()
+        elif self.correct_falling_pos():
+            pass
         else:
-            self.collided_brick = None
-            self.land()
-            return
+            self.status = 'walking'
+            self.is_jumpping = False
+            self.move_to_x()
+        self.action_delay += 1
 
-        self.status = 'walking'
-        dx = self.x_speed * self.dir
-        self.rect.x += dx
-        if self.rect.left < -10:
-            self.dir *= -1
-        elif self.rect.right > screen_width + 10:
-            self.dir *= -1
-        self.pos = self.rect.center
-        self.flip()
-        self.turn += 1
-        
     def jump(self):
-        self.status = 'jumping'
-        self.rect.y -= self.y_speed
-        self.pos = self.rect.center
-        brick = pygame.sprite.spritecollideany(self, self.map)
-        self.collided_brick = brick
-        if (brick and self.turn > 4 and brick.rect.top + 4 > self.rect.bottom) \
-            or self.rect.top < 0:
-            if self.turn > 8:
-                self.turn = 100
-                self.set_correct_pos(force=True)
-                self.status = 'walking'
-        self.turn += 1
+        initial_jump = self.action_delay < EnemyConfig.max_jumping_action_delay
+        if not self.collided_brick or initial_jump:
+            self.status = 'jumping'
+            self.is_jumpping = True
+            self.dy = -EnemyConfig.y_speed
+            self.move_to_y()
+        elif self.correct_jumping_pos():
+            pass
+        else:
+            self.action_delay = max(EnemyConfig.max_action_delay_list)
+            self.is_jumpping = False
+        self.action_delay += 1
+    
+    def correct_jumping_pos(self):
+        collided_brick_top =  self.collided_brick.rect.top
+        if self.rect.bottom >= collided_brick_top + 20:
+            self.dy = -EnemyConfig.y_speed
+            self.move_to_y()
+            return True
+        return False
 
-    def land(self):
-        self.status = 'landing'
-        self.rect.y += self.y_speed
-        self.pos = self.rect.center
-        if brick := pygame.sprite.spritecollideany(self, self.map):
-            self.collided_brick = brick
+    def fall(self):
+        self.status = 'falling'
+        self.is_jumpping = True
+        self.dy = EnemyConfig.y_speed
+        self.move_to_y()
+        # self.action_delay += 1
+
+    def correct_falling_pos(self):
+        collided_brick_top =  self.collided_brick.rect.top
+        if self.rect.bottom < collided_brick_top + EnemyConfig.brick_intersection:
+            self.dy = EnemyConfig.y_speed
+            self.move_to_y()
+            return True
+        return False
+
+    def get_jump_condition(self):
+        moved_pos = (self.pos[0], self.pos[1] - MapConfig.interval)
+        pseudo_enemy = PseudoEnemy(moved_pos, self.image)
+        if len(pygame.sprite.spritecollide(pseudo_enemy, Map.group, False)) > 1:
             return True
         return False
     
-    def set_correct_pos(self, force=False):
-        if self.collided_brick and (self.status not in  {'landing', 'jumping'} or force):
-            if self.rect.bottom != self.collided_brick.rect.top + 20:
-                self.rect.bottom = self.collided_brick.rect.top + 20
-                self.pos = self.rect.center
+    def set_collided_bricks(self):
+        if brick := pygame.sprite.spritecollideany(self, Map.group):
+            self.collided_brick = brick
+        else:
+            self.collided_brick = None
+        
+    def set_time_being_invincible(self):
+        if self.time_being_invincible:
+            self.time_being_invincible += 1
+            if self.time_being_invincible > EnemyConfig.max_time_being_invincible:
+                self.id = self.original_id
+                self.dx = self.x_speed * self.dir
+                self.time_being_invincible = 0
 
     def act_randomly(self):
-        self.flip()
-        if self.dangerous_count:
-            self.dangerous_count += 1
-            if self.dangerous_count > 500:
-                self.type = self.original_type
-                self.image = self.images[self.type]
-                self.original_image = self.original_original_image
-                self.x_speed = self.original_x_speed
-                self.dangerous_count = 0
+        if self.is_dead:
+            return self.fly()
 
-        self.max_turn = random.choice([40, 50, 60, 70, 80])
-        if self.turn < self.max_turn or self.status in {'landing', 'jumping'}:
-            return self.prev_action()
-        random_actions = [self.stand, self.walk, self.jump]
-        if self.get_jump_cond():
-            if self.jump_before:
-                weights = [0.2, 0.8, 0.0]
-                self.jump_before = False
-            else:
-                weights = [0.2, 0.2, 0.6]
-                self.jump_before = True
-        else:
-            weights = [0.2, 0.8, 0.0]
-        self.prev_action = random.choices(random_actions, weights=weights)[0]
-        self.turn = 0
-        return self.prev_action()
-
-    def flip(self):
-        flipping = True if self.dir == LEFT else False
-        self.image = pygame.transform.flip(self.original_image, flipping, False)
-        self.rect = self.image.get_rect(center=self.pos)
-    
-    def get_jump_cond(self):
-        for h in [50, 100, 150, 200]:
-            moved_pos = (self.pos[0], self.pos[1] - h)
-            pseudo = PseudoEnemy(moved_pos, self.image)
-            if pygame.sprite.spritecollideany(pseudo, self.map):
-                return True
-        return False
+        if self.new_round_delay < ScreenConfig.new_round_delay:
+            self.new_round_delay += 1
+            return
         
-    def remove(self):
-        self.group.remove(self)
+        self.set_collided_bricks()
+        self.set_time_being_invincible()
+        
+        self.max_action_delay = random.choice(EnemyConfig.max_action_delay_list)
+        if self.action_delay < self.max_action_delay or self.is_jumpping:
+            return self.prev_action()
+
+        random_actions = [self.stand, self.walk, self.jump]
+        if self.get_jump_condition():
+            if self.stand_before and self.jump_before:
+                weights = EnemyConfig.walking_weights
+            elif self.stand_before:
+                weights = EnemyConfig.walking_jumping_weights
+            elif self.jump_before:
+                weights = EnemyConfig.standing_walking_weights
+            else:
+                weights = EnemyConfig.standing_walking_jumping_weights
+        else:
+            if self.stand_before:
+                weights = EnemyConfig.walking_weights
+            else:
+                weights = EnemyConfig.standing_walking_weights
+        self.prev_action = random.choices(random_actions, weights=weights)[0]
+        self.action_delay = 0
+        self.stand_before = self.prev_action == self.stand
+        self.jump_before = self.prev_action == self.jump
+        return self.prev_action()
     
-    def make_dangerous(self):
-        self.type = 'reaper2'
-        self.image = self.images[self.type]
-        self.original_image = self.image
-        self.x_speed = 1
-        self.dangerous_count = 1
+    def remove(self):
+        self.is_dead = True
+        Enemy.group.remove(self)
+
+    def fly(self):
+        if self.initial_flying:
+            flying_x_speed = random.choice(EnemyConfig.flying_x_speed_range)
+            self.dx = flying_x_speed * self.player_dir + self.player_dx
+            self.dy = -EnemyConfig.flying_y_speed + self.player_dy / 4
+            self.initial_flying = False
+        else:
+            self.dy += EnemyConfig.flying_gravity
+        self.angle = (self.angle + EnemyConfig.flying_angular_speed) % 360
+        self.move_to_x()
+        self.move_to_y()
+        if self.dy > 0 and pygame.sprite.spritecollideany(self, Map.group):
+            Enemy.group.add(PseudoEnemy(self.pos, self.images['boom']))
+            Enemy.group.remove(self)
+            Enemy.count -= 1
 
 
 class PseudoEnemy(pygame.sprite.Sprite):
+
     def __init__(self, pos, image):
         super(PseudoEnemy,  self).__init__()
         self.pos = pos
-        self.rect = image.get_rect(center=self.pos)
+        self.image = image
+        self.rect = image.get_rect(center=pos)
+        self.boom_delay = 0
+    
+    def act_randomly(self):
+        self.boom_delay += 1
+        if self.boom_delay == EnemyConfig.max_boom_delay:
+            Enemy.group.remove(self)
