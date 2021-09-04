@@ -27,15 +27,6 @@ class Character(pygame.sprite.Sprite):
     def rotate_image(self, image, angle):
         return pygame.transform.rotozoom(image, angle, 1)
 
-    # @property
-    # def status(self):
-    #     return self._status
-    
-    # @status.setter
-    # def status(self, status):
-    #     self._status = status
-    #     self.original_image = self.images[status]
-
     @property
     def pos(self):
         return self._pos

@@ -2,6 +2,7 @@ import pygame
 
 from screen import ScreenConfig
 from map import BrickConfig, Map
+from boom import Boom
 from character import Direction, Character
 from enemy import Enemy
 from bubble import Bubble
@@ -19,6 +20,7 @@ class PlayerConfig:
     max_shooting_image_delay = 8 # delay for shooting image
     
     brick_intersection = 4 # intersection between player and collided brick
+    dead_brick_intersection = 20
 
 
 class Player(Character):
@@ -177,7 +179,7 @@ class Player(Character):
         player_bubble = pygame.sprite.groupcollide(Player.group, Bubble.group, False, False)
         if player_bubble:
             for bubble in player_bubble[self]:
-                if isinstance(bubble, Bubble) and not bubble.is_shooting:
+                if not bubble.is_shooting:
                     bubble.player_dir = self.dir
                     bubble.player_dx = self.dx
                     bubble.player_dy = self.dy
@@ -196,12 +198,49 @@ class Player(Character):
     
     def _check_enemy_collision(self):
         if enemy := pygame.sprite.spritecollideany(self, Enemy.group):
-            if isinstance(enemy, Enemy) and not enemy.is_dead:
+            if not enemy.is_dead:
                 if self.life > 0:
                     self.sounds['damaged'].play()
+                    Boom(self.images['boom'], self.pos)
                     self.life -= 1
                     if self.life > 0:
                         self.damaged_delay = 1
+                    else:
+                        DeadPlayer(self.images['dead'], self.dir, self.pos)
+
+
+class DeadPlayer(Character):
+
+    group = pygame.sprite.Group()
+
+    def __init__(self, image, dir, pos):
+        super(DeadPlayer, self).__init__()
+        self.dir = dir
+        self.original_image = image
+        self.pos = pos
+        self.dy = 0
+        DeadPlayer.group.add(self)
+
+    def set_collided_bricks(self):
+        player_brick = pygame.sprite.groupcollide(DeadPlayer.group, Map.group, False, False)
+        if player_brick:
+            self.collided_bricks = player_brick[self]
+        else:
+            self.collided_bricks = None
+
+    def fall(self):
+        self.set_collided_bricks()
+        self.move_to_y()
+        self.dy += PlayerConfig.gravity
+        if self.collided_bricks:
+            self.correct_pos()
+
+    def correct_pos(self):
+        self.dy = 0
+        collided_brick_top =  self.collided_bricks[0].rect.top
+        if self.rect.bottom != collided_brick_top + PlayerConfig.dead_brick_intersection:
+            self.rect.bottom = collided_brick_top + PlayerConfig.dead_brick_intersection
+            self.rect = self.rect
 
 
 class Heart(pygame.sprite.Sprite):

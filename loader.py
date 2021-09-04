@@ -36,7 +36,8 @@ class Loader:
             'shooting': pygame.image.load(os.path.join(player_image_path, "shooting.png")).convert_alpha(),
             'dead': pygame.image.load(os.path.join(player_image_path, "dead.png")).convert_alpha(),
             'ghost': pygame.image.load(os.path.join(player_image_path, "ghost.png")).convert_alpha(),
-            'heart': pygame.image.load(os.path.join(player_image_path, "heart.png")).convert_alpha()
+            'heart': pygame.image.load(os.path.join(player_image_path, "heart.png")).convert_alpha(),
+            'boom': pygame.image.load(os.path.join(player_image_path, "boom.png")).convert_alpha()
         }
         return player_images
     

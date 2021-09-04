@@ -4,6 +4,7 @@ import pygame
 
 from screen import ScreenConfig
 from map import MapConfig, Map
+from boom import Boom
 from character import Direction, Character
 
 
@@ -26,7 +27,6 @@ class EnemyConfig:
     flying_y_speed = 20
     flying_gravity = 0.5
     flying_angular_speed = 20
-    max_boom_delay = 6 # time for drawing boom image
 
     walking_weights = [0., 1., 0.]
     walking_jumping_weights = [0., 0.2, 0.8]
@@ -238,7 +238,7 @@ class Enemy(Character):
         self.move_to_x()
         self.move_to_y()
         if self.dy > 0 and pygame.sprite.spritecollideany(self, Map.group):
-            Enemy.group.add(PseudoEnemy(self.pos, self.images['boom']))
+            Boom(self.images['boom'], self.pos)
             Enemy.group.remove(self)
             Enemy.count -= 1
 
@@ -250,9 +250,3 @@ class PseudoEnemy(pygame.sprite.Sprite):
         self.pos = pos
         self.image = image
         self.rect = image.get_rect(center=pos)
-        self.boom_delay = 0
-    
-    def act_randomly(self):
-        self.boom_delay += 1
-        if self.boom_delay == EnemyConfig.max_boom_delay:
-            Enemy.group.remove(self)

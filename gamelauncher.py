@@ -5,7 +5,8 @@ import pygame
 from loader import Loader
 from screen import ScreenConfig
 from map import Map
-from player import PlayerConfig, Player, Heart
+from boom import Boom
+from player import PlayerConfig, Player, DeadPlayer, Heart
 from enemy import Enemy
 from bubble import Bubble
 
@@ -87,6 +88,10 @@ class GameLauncher:
             self.player.new_round_delay = self.new_round_delay
             self.new_round_delay += 1
 
+            # dead player action
+            for dead_player in DeadPlayer.group:
+                dead_player.fall()
+
             # enemy action
             for enemy in Enemy.group:
                 enemy.act_randomly()
@@ -94,6 +99,10 @@ class GameLauncher:
             # bubble action
             for bubble in Bubble.group:
                 bubble.shoot()
+            
+            # boom action
+            for boom in Boom.group:
+                boom.act()
             
             # new round
             if Enemy.count == 0:
@@ -176,6 +185,9 @@ class GameLauncher:
         else:
             Enemy.group.draw(self.screen)
 
+        # draw dead player
+        DeadPlayer.group.draw(self.screen)
+
         # draw player
         if self.new_round_delay < ScreenConfig.new_round_delay \
             or 0 < self.player.damaged_delay < ScreenConfig.new_round_delay:
@@ -186,6 +198,9 @@ class GameLauncher:
         
         # draw bubble
         Bubble.group.draw(self.screen)
+
+        # draw boom
+        Boom.group.draw(self.screen)
 
         pygame.display.update()
 

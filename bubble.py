@@ -4,6 +4,7 @@ import pygame
 
 from screen import ScreenConfig
 from map import Map
+from boom import Boom
 from character import Direction, Character
 from enemy import EnemyConfig, Enemy
 
@@ -16,8 +17,6 @@ class BubbleConfig:
     y_speed = 1
     angular_speed = 1
     max_angle = 20
-
-    max_boom_delay = 6 # time for drawing boom image
 
 
 class Bubble(Character):
@@ -112,7 +111,7 @@ class Bubble(Character):
             self.remove(revival=True)
     
     def remove(self, revival=False):
-        Bubble.group.add(PseudoBubble(self.pos, self.images['boom']))
+        Boom(self.images['boom'], self.pos)
         if self.enemy:
             self.enemy.pos = self.pos
             if self.player_dir:
@@ -131,7 +130,7 @@ class Bubble(Character):
         if self.status != 'normal' or not self.is_shooting:
             return None
         if enemy := pygame.sprite.spritecollideany(self, Enemy.group):
-            if isinstance(enemy, Enemy) and enemy.id != EnemyConfig.num_type:
+            if enemy.id != EnemyConfig.num_type:
                 return enemy
         return None
 
@@ -149,18 +148,3 @@ class Bubble(Character):
             if abs(self.angle) > 20:
                 self.angular_dir *= -1
             self.jump()
-
-
-class PseudoBubble(pygame.sprite.Sprite):
-
-    def __init__(self, pos, image):
-        super(PseudoBubble, self).__init__()
-        self.pos = pos
-        self.image = image
-        self.rect = image.get_rect(center=pos)
-        self.boom_delay = 0
-    
-    def shoot(self):
-        self.boom_delay += 1 
-        if self.boom_delay == BubbleConfig.max_boom_delay:
-            Bubble.group.remove(self)
