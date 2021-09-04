@@ -11,7 +11,7 @@ from enemy import EnemyConfig, Enemy
 
 class BubbleConfig:
 
-    max_x_speed = 16 # shooting speed
+    max_x_speed = 12 # shooting speed
     x_acc = 1
     x_speed = 1
     y_speed = 1

@@ -71,7 +71,11 @@ class GameLauncher:
                 Map(self.map_image)
 
                 # create enemy
-                for _ in range(self.round):
+                if self.round - 1 < len(ScreenConfig.enemy_num_list):
+                    enemy_num = ScreenConfig.enemy_num_list[self.round - 1]
+                else:
+                    enemy_num += 5
+                for _ in range(enemy_num):
                     enemy = Enemy(self.enemy_images, self.round)
                     enemy.new_round_delay = 0
                 self.new_round = False

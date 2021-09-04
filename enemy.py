@@ -14,8 +14,9 @@ class EnemyConfig:
     num_type = 4
 
     max_time_being_invincible = 500
-    max_action_delay_list = [100, 200, 300]
     max_walking_action_delay = 16
+    max_action_delay_list_coef = [3, 3, 6, 12]
+    max_action_delay_list = [c * 16 for c in max_action_delay_list_coef] # 16 = max_walking_action_delay
     max_jumping_action_delay = 20
 
     brick_intersection = 20
@@ -30,8 +31,8 @@ class EnemyConfig:
 
     walking_weights = [0., 1., 0.]
     walking_jumping_weights = [0., 0.2, 0.8]
-    standing_walking_weights = [0.2, 0.8, 0.]
-    standing_walking_jumping_weights = [0.2, 0.2, 0.6]
+    standing_walking_weights = [0.3, 0.7, 0.]
+    standing_walking_jumping_weights = [0.1, 0.1, 0.8]
 
 
 class Enemy(Character):
@@ -112,7 +113,7 @@ class Enemy(Character):
     def stand(self):
         self.status = 'standing'
         self.is_jumpping = False
-        if self.action_delay % EnemyConfig.max_walking_action_delay == 0:
+        if self.action_delay % EnemyConfig.max_walking_action_delay == 1:
             self.dir *= -1
             self.dx *= -1
         self.action_delay += 1
