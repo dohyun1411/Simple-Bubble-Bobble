@@ -2,13 +2,13 @@ import os
 
 import pygame
 
+from config import *
 from loader import Loader
-from screen import ScreenConfig
 from map import Map
-from boom import Boom
-from player import PlayerConfig, Player, DeadPlayer, Heart
+from player import Player, DeadPlayer, Heart
 from enemy import Enemy
 from bubble import Bubble
+from boom import Boom
 
 
 class GameLauncher:
@@ -71,11 +71,11 @@ class GameLauncher:
                 Map(self.map_image)
 
                 # create enemy
-                if self.round - 1 < len(ScreenConfig.enemy_num_list):
-                    enemy_num = ScreenConfig.enemy_num_list[self.round - 1]
-                else:
-                    enemy_num += 10
-                for _ in range(enemy_num):
+                # if self.round - 1 < len(ScreenConfig.enemy_num_list):
+                #     enemy_num = ScreenConfig.enemy_num_list[self.round - 1]
+                # else:
+                #     enemy_num += 10
+                for _ in range(self.round):
                     enemy = Enemy(self.enemy_images, self.round)
                     enemy.new_round_delay = 0
                 self.new_round = False
@@ -210,6 +210,9 @@ class GameLauncher:
 
     def quit(self):
         pygame.quit()
+    
+    def set_initial_screen(self):
+        pass
 
 
 if __name__ == '__main__':

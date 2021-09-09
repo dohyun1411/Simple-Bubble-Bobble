@@ -2,12 +2,7 @@ import random
 
 import pygame
 
-from screen import ScreenConfig
-  
-
-class BrickConfig:
-    
-    size = 40
+from config import *
 
 
 class Brick(pygame.sprite.Sprite):

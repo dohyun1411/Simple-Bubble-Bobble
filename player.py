@@ -1,26 +1,11 @@
 import pygame
 
-from screen import ScreenConfig
-from map import BrickConfig, Map
+from config import *
+from map import Map
 from boom import Boom
 from character import Direction, Character
 from enemy import Enemy
 from bubble import Bubble
-
-
-class PlayerConfig:
-
-    x_speed = 6
-    y_speed = 20 # jumping speed
-    gravity = 1
-
-    life = ScreenConfig.num_heart
-
-    max_walking_image_delay = 4 # delay for walking image
-    max_shooting_image_delay = 8 # delay for shooting image
-    
-    brick_intersection = 4 # intersection between player and collided brick
-    dead_brick_intersection = 20
 
 
 class Player(Character):
@@ -179,7 +164,7 @@ class Player(Character):
         player_bubble = pygame.sprite.groupcollide(Player.group, Bubble.group, False, False)
         if player_bubble:
             for bubble in player_bubble[self]:
-                if not bubble.is_shooting:
+                if not bubble.is_shooting and self.is_jumpping:
                     bubble.player_dir = self.dir
                     bubble.player_dx = self.dx
                     bubble.player_dy = self.dy
