@@ -22,15 +22,39 @@ class ScreenConfig:
     heart_pos = [(50 * i, 50) for i in range(1, num_heart + 1)]
 
     WHITE = (255, 255, 255)
+    BLACK = (0, 0, 0)
+    RED = (255, 0, 0)
     round_font = 'comicsansms'
     round_size = 30
     round_color = WHITE
     round_pos = (width / 2, y_offset)
 
     gameover_font = 'aladinregular'
-    gameover_size = 60
+    gameover_size = 120
     gameover_color = WHITE
     gameover_pos =(width / 2, height / 2)
+
+    gamename_size = 500
+    gamename_pos =(width / 2 - gamename_size / 2, height / 10)
+
+    easy_font = 'comicsansms'
+    easy_size = 60
+    easy_pos = (width / 3, 2 * height / 3)
+
+    hard_font = 'comicsansms'
+    hard_size = 60
+    hard_pos = (2 * width / 3, 2 * height / 3)
+
+    info_font = 'comicsansms'
+    info_size = 30
+    info_color = WHITE
+    info_pos = (width / 2, 5 * height / 6)
+    max_blinking_delay = 60
+
+    EASY = 0
+    HARD = 1
+
+    loading_sound_time = 8.3
 
 
 class BrickConfig:

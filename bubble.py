@@ -91,7 +91,7 @@ class Bubble(Character):
         brick = pygame.sprite.spritecollideany(self, Map.group)
         if brick and abs(self.rect.top - brick.rect.top) > abs(self.rect.top - brick.rect.bottom):
             if not self.initial_dir:
-                self.initial_dir = (self.angle > 0) * 2 - 1
+                self.initial_dir = (self.angle < 0) * 2 - 1
                 self.dx = self.initial_dir * BubbleConfig.x_speed
             self.move_to_x_while_jumping()
         else:
