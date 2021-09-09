@@ -1,9 +1,6 @@
 import pygame
 
-
-class BoomConfig:
-
-    delay = 6
+from config import *
 
 
 class Boom(pygame.sprite.Sprite):

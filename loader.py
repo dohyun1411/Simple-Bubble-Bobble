@@ -13,7 +13,8 @@ class Loader:
     def load_background_images():
         background_image_path = os.path.join(Loader.image_path, 'background')
         background_images = {
-            'night': pygame.image.load(os.path.join(background_image_path, "night.png")).convert_alpha()
+            'night': pygame.image.load(os.path.join(background_image_path, "night.png")).convert_alpha(),
+            'gamename': pygame.image.load(os.path.join(background_image_path, "gamename.png")).convert_alpha(),
         }
         return background_images
     
@@ -48,7 +49,9 @@ class Loader:
             'shooting': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'bubble.mp3')),
             'bubble_kill': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'bubble_kill.mp3')),
             'damaged': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'player_damaged.mp3')),
-            'gameover': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'game_over.mp3'))
+            'gameover': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'game_over.mp3')),
+            'init': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'init.mp3')),
+            'loading': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'loading.mp3')),
         }
         return player_sounds
     

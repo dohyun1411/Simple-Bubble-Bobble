@@ -2,21 +2,11 @@ import random
 
 import pygame
 
-from screen import ScreenConfig
+from config import *
 from map import Map
 from boom import Boom
 from character import Direction, Character
-from enemy import EnemyConfig, Enemy
-
-
-class BubbleConfig:
-
-    max_x_speed = 12 # shooting speed
-    x_acc = 1
-    x_speed = 1
-    y_speed = 1
-    angular_speed = 1
-    max_angle = 20
+from enemy import Enemy
 
 
 class Bubble(Character):
@@ -101,7 +91,7 @@ class Bubble(Character):
         brick = pygame.sprite.spritecollideany(self, Map.group)
         if brick and abs(self.rect.top - brick.rect.top) > abs(self.rect.top - brick.rect.bottom):
             if not self.initial_dir:
-                self.initial_dir = (self.angle > 0) * 2 - 1
+                self.initial_dir = (self.angle < 0) * 2 - 1
                 self.dx = self.initial_dir * BubbleConfig.x_speed
             self.move_to_x_while_jumping()
         else:

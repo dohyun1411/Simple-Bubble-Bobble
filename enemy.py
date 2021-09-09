@@ -2,37 +2,10 @@ import random
 
 import pygame
 
-from screen import ScreenConfig
+from config import *
 from map import MapConfig, Map
 from boom import Boom
 from character import Direction, Character
-
-
-class EnemyConfig:
-    
-    name = 'reaper'
-    num_type = 4
-
-    max_time_being_invincible = 700
-    max_walking_action_delay = 16
-    max_action_delay_list_coef = [3, 6, 12, 15]
-    max_action_delay_list = [c * 16 for c in max_action_delay_list_coef] # 16 = max_walking_action_delay
-    max_jumping_action_delay = 20
-
-    brick_intersection = 20
-
-    y_speed = 2
-    invincible_x_speed = 1 # x speed for invincible enemy
-
-    flying_x_speed_range = range(1, 1 + 6) # 6 is player x_speed
-    flying_y_speed = 20
-    flying_gravity = 0.5
-    flying_angular_speed = 20
-
-    walking_weights = [0., 1., 0.]
-    walking_jumping_weights = [0., 0.5, 0.5]
-    standing_walking_weights = [0.4, 0.6, 0.]
-    standing_walking_jumping_weights = [0.3, 0.3, 0.4]
 
 
 class Enemy(Character):
