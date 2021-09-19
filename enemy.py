@@ -40,6 +40,7 @@ class Enemy(Character):
         self.original_id = self.id
         # self.original_x_speed = self.x_speed
         self.time_being_invincible = 0
+        self.invincible_before = False
 
         self.status = 'walking'
         self.prev_action = self.walk
@@ -82,6 +83,7 @@ class Enemy(Character):
         self.id = EnemyConfig.num_type
         self.dx = EnemyConfig.invincible_x_speed * self.dir
         self.time_being_invincible = 1
+        self.invincible_before = True
 
     def stand(self):
         self.status = 'standing'
@@ -170,6 +172,11 @@ class Enemy(Character):
         
         self.set_collided_bricks()
         self.set_time_being_invincible()
+
+        if self.invincible_before:
+            self.invincible_before = False
+            self.prev_action = self.walk
+            return self.walk()
         
         self.max_action_delay = random.choice(EnemyConfig.max_action_delay_list)
         if self.action_delay < self.max_action_delay or self.is_jumpping:

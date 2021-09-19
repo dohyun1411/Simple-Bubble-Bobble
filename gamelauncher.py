@@ -196,26 +196,6 @@ class GameLauncher:
         # draw map
         Map.group.draw(self.screen)
 
-        # draw heart
-        Heart.group.draw(self.screen)
-        
-        if self.time <= ScreenConfig.warning_time:
-            self.time_color = ScreenConfig.RED
-        else:
-            self.time_color = ScreenConfig.WHITE
-
-        # text time
-        time_font = pygame.font.SysFont(ScreenConfig.time_font, ScreenConfig.time_size)
-        time_text = time_font.render(f"TIME {self.time // ScreenConfig.fps}", True, self.time_color)
-        time_rect = time_text.get_rect(center=ScreenConfig.time_pos)
-        self.screen.blit(time_text, time_rect)
-
-        # text round
-        round_font = pygame.font.SysFont(ScreenConfig.round_font, ScreenConfig.round_size)
-        round_text = round_font.render(f"ROUND {self.round}", True, ScreenConfig.round_color)
-        round_rect = round_text.get_rect(center=ScreenConfig.round_pos)
-        self.screen.blit(round_text, round_rect)
-
         # draw enemy
         if self.new_round_delay < ScreenConfig.new_round_delay:
             if self.new_round_delay % ScreenConfig.blinking_interval in range(ScreenConfig.blinking_interval // 2):
@@ -239,6 +219,26 @@ class GameLauncher:
 
         # draw boom
         Boom.group.draw(self.screen)
+        
+        # draw heart
+        Heart.group.draw(self.screen)
+        
+        if self.time <= ScreenConfig.warning_time:
+            self.time_color = ScreenConfig.RED
+        else:
+            self.time_color = ScreenConfig.WHITE
+
+        # text time
+        time_font = pygame.font.SysFont(ScreenConfig.time_font, ScreenConfig.time_size)
+        time_text = time_font.render(f"TIME {self.time // ScreenConfig.fps}", True, self.time_color)
+        time_rect = time_text.get_rect(center=ScreenConfig.time_pos)
+        self.screen.blit(time_text, time_rect)
+
+        # text round
+        round_font = pygame.font.SysFont(ScreenConfig.round_font, ScreenConfig.round_size)
+        round_text = round_font.render(f"ROUND {self.round}", True, ScreenConfig.round_color)
+        round_rect = round_text.get_rect(center=ScreenConfig.round_pos)
+        self.screen.blit(round_text, round_rect)
 
         if self.gameover:
             # text gameover
