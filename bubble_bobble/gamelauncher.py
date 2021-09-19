@@ -21,6 +21,7 @@ class GameLauncher:
         self.screen = pygame.display.set_mode(ScreenConfig.width_height)
         self.clock = pygame.time.Clock()
 
+        self.mode = ScreenConfig.EASY
         self.round = 1
         self.new_round = True
         self.new_round_delay = 0
