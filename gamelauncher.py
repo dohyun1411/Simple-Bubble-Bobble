@@ -219,7 +219,7 @@ class GameLauncher:
 
         # draw boom
         Boom.group.draw(self.screen)
-        
+
         # draw heart
         Heart.group.draw(self.screen)
         
@@ -341,16 +341,6 @@ class GameLauncher:
             if loading > max_loading:
                 break
             player.walk()
-            
-            # player action
-            # if stop - 20 < loading < stop + 20:
-            #     player.stand()
-            # else:
-            #     if loading == turn:
-            #         player.dx *= -1
-            #     elif loading == int(0.58 * max_loading):
-            #         player.dx *= -1
-            #     player.walk()
 
             # draw background
             self.screen.fill(ScreenConfig.BLACK)
@@ -392,12 +382,4 @@ class GameLauncher:
         Player.group.remove(player)
         self.sounds['loading'].stop()
         self.run()
-
-
-if __name__ == '__main__':
-    restart = True
-    while restart:
-        gl = GameLauncher()
-        gl.start()
-        restart = gl.restart
-    gl.quit()
+        

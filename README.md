@@ -8,9 +8,9 @@ pip install pygame
 ```
 
 ## How to Run
-```gamelauncher.py```를 실행해주세요.
+```main.py```를 실행해주세요.
 ```
-python gamelauncher.py
+python main.py
 ```
 
 ## How to Play the Game
