@@ -190,7 +190,7 @@ class Player(Character):
                     self.life -= 1
                     if self.life > 0:
                         self.damaged_delay = 1
-                    else:
+                    elif not DeadPlayer.group:
                         DeadPlayer(self.images['dead'], self.dir, self.pos)
 
 

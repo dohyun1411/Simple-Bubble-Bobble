@@ -24,6 +24,9 @@ class GameLauncher:
 
         self.round = 1
         self.new_round = True
+        self.new_round_delay = 0
+        self.time = ScreenConfig.max_time
+        self.time_color = ScreenConfig.time_color
         self.gameover = False
         self.initial_gameover_sound = True
         self.running = True
@@ -68,21 +71,26 @@ class GameLauncher:
     def run(self): # TODO: make it depend on self.mode
         # play BGM
         self.bgm.play(-1)
-        
+
         # event loop
         while self.running:
             self.clock.tick(ScreenConfig.fps)
             
+            if not self.gameover and self.new_round_delay >= ScreenConfig.new_round_delay:
+                self.time -= 1
             self.handle_event()
 
             if self.new_round:
+
+                if not self.gameover:
+                    self.time = ScreenConfig.max_time
 
                  # create map
                 Map.group.empty()
                 Map(self.map_image)
 
                 # create enemy
-                if self.mode == ScreenConfig.EASY:
+                if self.mode == ScreenConfig.EASY or self.mode == ScreenConfig.HARD: # TODO: EASY와 HARD 분리
                     for _ in range(self.round):
                         enemy = Enemy(self.enemy_images, self.round)
                         enemy.new_round_delay = 0
@@ -121,9 +129,19 @@ class GameLauncher:
                 self.new_round = True
                 self.round += 1
             
+            # time warning
+            if self.time == ScreenConfig.warning_time:
+                self.sounds['hurry'].set_volume(1)
+                self.sounds['hurry'].play()
+
             # game over
-            self.gameover = self.player.life <= 0
+            self.gameover = self.player.life <= 0 or self.time <= 0
             if self.initial_gameover_sound and self.gameover:
+                self.player.life = 0
+                if self.time <= 0:
+                    self.player.sounds['damaged'].play()
+                    Boom(self.player.images['boom'], self.player.pos)
+                    DeadPlayer(self.player.images['dead'], self.player.dir, self.player.pos)
                 self.bgm.stop()
                 self.sounds['gameover'].play()
                 self.initial_gameover_sound = False
@@ -180,6 +198,17 @@ class GameLauncher:
 
         # draw heart
         Heart.group.draw(self.screen)
+        
+        if self.time <= ScreenConfig.warning_time:
+            self.time_color = ScreenConfig.RED
+        else:
+            self.time_color = ScreenConfig.WHITE
+
+        # text time
+        time_font = pygame.font.SysFont(ScreenConfig.time_font, ScreenConfig.time_size)
+        time_text = time_font.render(f"TIME {self.time // ScreenConfig.fps}", True, self.time_color)
+        time_rect = time_text.get_rect(center=ScreenConfig.time_pos)
+        self.screen.blit(time_text, time_rect)
 
         # text round
         round_font = pygame.font.SysFont(ScreenConfig.round_font, ScreenConfig.round_size)
@@ -220,7 +249,7 @@ class GameLauncher:
 
             # test info
             info_font = pygame.font.SysFont(ScreenConfig.info_font, ScreenConfig.info_size)
-            info_text = info_font.render("PRESS R/Q TO RESTART/QUIT", True, ScreenConfig.info_color)
+            info_text = info_font.render("PRESS R TO RESTART", True, ScreenConfig.info_color)
             info_rect = info_text.get_rect(center=ScreenConfig.info_pos)
             if self.blinking_delay in range(2 * ScreenConfig.max_blinking_delay // 3):
                 self.screen.blit(info_text, info_rect)
@@ -304,24 +333,24 @@ class GameLauncher:
         loading = 0
         max_loading = ScreenConfig.loading_sound_time * ScreenConfig.fps
         player = Player(self.player_images, self.sounds)
-        player.dx = 3
-        turn = max_loading // 2
-        stop = max_loading // 5
+        player.dx = 2
+        player.pos = (player.pos[0] + 160, player.pos[1])
         while self.running:
             self.clock.tick(ScreenConfig.fps)
 
             if loading > max_loading:
                 break
+            player.walk()
             
             # player action
-            if stop - 20 < loading < stop + 20:
-                player.stand()
-            else:
-                if loading == turn:
-                    player.dx *= -1
-                elif loading == int(0.58 * max_loading):
-                    player.dx *= -1
-                player.walk()
+            # if stop - 20 < loading < stop + 20:
+            #     player.stand()
+            # else:
+            #     if loading == turn:
+            #         player.dx *= -1
+            #     elif loading == int(0.58 * max_loading):
+            #         player.dx *= -1
+            #     player.walk()
 
             # draw background
             self.screen.fill(ScreenConfig.BLACK)

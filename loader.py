@@ -52,6 +52,7 @@ class Loader:
             'gameover': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'game_over.mp3')),
             'init': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'init.mp3')),
             'loading': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'loading.mp3')),
+            'hurry': pygame.mixer.Sound(os.path.join(Loader.sound_path, 'hurry.mp3')),
         }
         return player_sounds
     
