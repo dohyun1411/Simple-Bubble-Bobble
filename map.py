@@ -20,25 +20,6 @@ class Brick(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.pos)
 
 
-class MapConfig:
-
-    num_floor = 4
-    floor_types = [ # _ : brick, . : empty
-        '___________........___________',
-        '....______________________....',
-        '_______.....______....._______',
-        '___...____......______________',
-        '______________......____...___',
-        '....____....______............',
-        '............______....____....',
-        '...__...__...__...__...__...__',
-        '__...__...__...__...__...__...'
-    ]
-    bottom_floor_type = '______________________________'
-    interval = 180 # TODO: make interval depend on num_floor
-    top_y = ScreenConfig.height - BrickConfig.size / 2
-
-
 class Map:
 
     group = pygame.sprite.Group()

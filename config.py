@@ -7,6 +7,8 @@ class ScreenConfig:
     y_offset = 60
 
     fps = 60
+    max_time = 45 * fps
+    warning_time = 5 * fps
 
     volume = 0.5
 
@@ -28,6 +30,11 @@ class ScreenConfig:
     round_size = 30
     round_color = WHITE
     round_pos = (width / 2, y_offset)
+
+    time_font = 'comicsansms'
+    time_size = 30
+    time_color = WHITE
+    time_pos = (width - 100, y_offset)
 
     gameover_font = 'aladinregular'
     gameover_size = 120
@@ -60,6 +67,25 @@ class ScreenConfig:
 class BrickConfig:
     
     size = 40
+
+
+class MapConfig:
+
+    num_floor = 4
+    floor_types = [ # _ : brick, . : empty
+        '___________........___________',
+        '....______________________....',
+        '_______.....______....._______',
+        '___...____......______________',
+        '______________......____...___',
+        '....____....______............',
+        '............______....____....',
+        '...__...__...__...__...__...__',
+        '__...__...__...__...__...__...'
+    ]
+    bottom_floor_type = '______________________________'
+    interval = 180 # TODO: make interval depend on num_floor
+    top_y = ScreenConfig.height - BrickConfig.size / 2
 
 
 class PlayerConfig:
