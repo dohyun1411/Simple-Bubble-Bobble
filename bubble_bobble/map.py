@@ -2,7 +2,7 @@ import random
 
 import pygame
 
-from config import *
+from .config import *
 
 
 class Brick(pygame.sprite.Sprite):

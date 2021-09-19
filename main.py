@@ -1,4 +1,4 @@
-from gamelauncher import GameLauncher
+from bubble_bobble.gamelauncher import GameLauncher
 
 
 restart = True

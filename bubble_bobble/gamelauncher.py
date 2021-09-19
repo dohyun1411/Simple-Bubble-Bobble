@@ -1,15 +1,14 @@
 import os
-import random
 
 import pygame
 
-from config import *
-from loader import Loader
-from map import Map
-from player import Player, DeadPlayer, Heart
-from enemy import Enemy
-from bubble import Bubble
-from boom import Boom
+from .config import *
+from .loader import Loader
+from .map import Map
+from .player import Player, DeadPlayer, Heart
+from .enemy import Enemy
+from .bubble import Bubble
+from .boom import Boom
 
 
 class GameLauncher:

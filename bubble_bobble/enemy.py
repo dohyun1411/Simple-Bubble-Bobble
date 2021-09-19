@@ -2,10 +2,10 @@ import random
 
 import pygame
 
-from config import *
-from map import MapConfig, Map
-from boom import Boom
-from character import Direction, Character
+from .config import *
+from .map import MapConfig, Map
+from .boom import Boom
+from .character import Direction, Character
 
 
 class Enemy(Character):
