@@ -33,6 +33,8 @@ class GameLauncher:
         self.restart = False
         self.blinking_delay = 0
 
+        self.player_score = 0
+
         # load bgm
         self.bgm = pygame.mixer.music
         self.bgm.load(os.path.join(Loader.sound_path, 'main_theme.mp3'))
@@ -76,8 +78,16 @@ class GameLauncher:
         while self.running:
             self.clock.tick(ScreenConfig.fps)
             
-            if not self.gameover and self.new_round_delay >= ScreenConfig.new_round_delay:
+            # update time
+            if not self.gameover and self.new_round_delay >= ScreenConfig.new_round_delay \
+                and not Enemy.is_all_flying():
                 self.time -= 1
+            
+            # update score
+            if not self.gameover:
+                self.player_score = Enemy.score
+
+            # handle events
             self.handle_event()
 
             if self.new_round:
@@ -85,7 +95,7 @@ class GameLauncher:
                 if not self.gameover:
                     self.time = ScreenConfig.max_time
 
-                 # create map
+                # create map
                 Map.group.empty()
                 Map(self.map_image)
 
@@ -230,7 +240,7 @@ class GameLauncher:
 
         # text time
         time_font = pygame.font.SysFont(ScreenConfig.time_font, ScreenConfig.time_size)
-        time_text = time_font.render(f"TIME {self.time // ScreenConfig.fps}", True, self.time_color)
+        time_text = time_font.render(f"TIME: {self.time // ScreenConfig.fps}", True, self.time_color)
         time_rect = time_text.get_rect(center=ScreenConfig.time_pos)
         self.screen.blit(time_text, time_rect)
 
@@ -239,6 +249,12 @@ class GameLauncher:
         round_text = round_font.render(f"ROUND {self.round}", True, ScreenConfig.round_color)
         round_rect = round_text.get_rect(center=ScreenConfig.round_pos)
         self.screen.blit(round_text, round_rect)
+
+        # text player score
+        score_font = pygame.font.SysFont(ScreenConfig.score_font, ScreenConfig.score_size)
+        player_score_text = score_font.render(f"SCORE: {self.player_score}", True, ScreenConfig.score_color)
+        player_score_rect = player_score_text.get_rect(center=ScreenConfig.player_score_pos)
+        self.screen.blit(player_score_text, player_score_rect)
 
         if self.gameover:
             # text gameover

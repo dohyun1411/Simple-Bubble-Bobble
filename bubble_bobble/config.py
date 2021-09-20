@@ -27,7 +27,7 @@ class ScreenConfig:
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
     round_font = 'comicsansms'
-    round_size = 30
+    round_size = 45
     round_color = WHITE
     round_pos = (width / 2, y_offset)
 
@@ -56,6 +56,12 @@ class ScreenConfig:
     info_size = 30
     info_color = WHITE
     info_pos = (width / 2, 5 * height / 6)
+
+    score_font = 'comicsansms'
+    score_size = 30
+    score_color = WHITE
+    player_score_pos = (width - 100, 2 * y_offset)
+
     max_blinking_delay = 60
 
     EASY = 0
@@ -128,6 +134,9 @@ class EnemyConfig:
     walking_jumping_weights = [0., 0.5, 0.5]
     standing_walking_weights = [0.4, 0.6, 0.]
     standing_walking_jumping_weights = [0.3, 0.3, 0.4]
+
+    weights = [0.5, 0.3, 0.2, 0.0]
+    scores = [6, 10, 15] # inverse of weights
 
 
 class BubbleConfig:

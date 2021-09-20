@@ -12,6 +12,15 @@ class Enemy(Character):
 
     group = pygame.sprite.Group()
     count = 0
+    score = 0
+
+    @staticmethod
+    def is_all_flying():
+        flying_enemy = 0
+        for enemy in Enemy.group:
+            if enemy.initial_flying == False:
+                flying_enemy += 1
+        return Enemy.count == flying_enemy
 
     def __init__(self, images, round):
         super(Enemy, self).__init__()
@@ -20,7 +29,7 @@ class Enemy(Character):
         self.round = round
 
         # TODO: make id depends on round
-        weights = [0.5, 0.3, 0.2, 0.0]
+        weights = EnemyConfig.weights
         self.id = random.choices(range(1, EnemyConfig.num_type + 1), weights)[0]
 
         if self.id == EnemyConfig.num_type:
@@ -222,6 +231,7 @@ class Enemy(Character):
             Boom(self.images['boom'], self.pos)
             Enemy.group.remove(self)
             Enemy.count -= 1
+            Enemy.score += EnemyConfig.scores[self.id - 1]
 
 
 class PseudoEnemy(pygame.sprite.Sprite):
