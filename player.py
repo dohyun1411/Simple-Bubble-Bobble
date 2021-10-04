@@ -1,11 +1,11 @@
 import pygame
 
-from .config import *
-from .map import Map
-from .boom import Boom
-from .character import Direction, Character
-from .enemy import Enemy
-from .bubble import Bubble
+from config import *
+from map import Map
+from boom import Boom
+from character import Direction, Character
+from enemy import Enemy
+from bubble import Bubble
 
 
 class Player(Character):

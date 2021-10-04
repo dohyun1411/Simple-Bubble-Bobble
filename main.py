@@ -1,6 +1,6 @@
 import argparse
 
-from bubble_bobble.gamelauncher import GameLauncher
+from gamelauncher import GameLauncher
 
 
 if __name__ == '__main__':

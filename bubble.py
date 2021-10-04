@@ -2,11 +2,11 @@ import random
 
 import pygame
 
-from .config import *
-from .map import Map
-from .boom import Boom
-from .character import Direction, Character
-from .enemy import EnemyConfig, Enemy
+from config import *
+from map import Map
+from boom import Boom
+from character import Direction, Character
+from enemy import EnemyConfig, Enemy
 
 
 class Bubble(Character):
