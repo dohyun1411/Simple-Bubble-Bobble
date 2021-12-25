@@ -1,5 +1,8 @@
 # Simple-Bubble-Bobble
+![image](https://user-images.githubusercontent.com/65074958/147386114-347c4b3f-93cc-40c8-b197-1e895737f3ad.png)
+
 pygame을 이용한 Bubble Bobble 게임입니다.
+
 
 ## Requirements
 pygame 패키지를 설치해주세요.
@@ -14,7 +17,7 @@ python main.py
 ```
 
 ## How to Play the Game
-버블을 발사하여 적을 버블 안에 가두세요. 버블에 가둔 후 터뜨리면 적을 물리칠 수 있습니다. 만약 제때 터뜨리지 못하여 버블이 천장까지 도달할 경우 버블 안에 갇힌 적은 부활하게 되며 한동안 무적상태가 됩니다.
+버블을 발사하여 적을 버블 안에 가두세요. 그 후 버블을 항해 점프하여 버블을 터뜨리세요. 버블을 터뜨리면 적을 물리칠 수 있습니다. 만약 제때 터뜨리지 못하여 버블이 천장까지 도달할 경우 버블 안에 갇힌 적은 부활하게 되며 한동안 무적상태가 됩니다.
 
 ### Player
 ![standing](https://user-images.githubusercontent.com/65074958/131250668-7bf9d105-07fe-4cb7-bc60-09ca04c6f79b.png)
