@@ -1,4 +1,6 @@
 # Simple-Bubble-Bobble
+NEW: [An AI agent that plays this game](https://github.com/dohyun1411/Bubble-Bobble-AI)
+
 ![image](https://user-images.githubusercontent.com/65074958/147386114-347c4b3f-93cc-40c8-b197-1e895737f3ad.png)
 
 pygame을 이용한 Bubble Bobble 게임입니다.
